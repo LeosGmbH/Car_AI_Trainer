@@ -1,0 +1,4 @@
+1.  py -3.10 -m venv venv //py version <3.10 da neuere "distutils" nichtmehr unterstützen aber benötigt wird
+2.  venv\Scripts\activate
+3.  pip install -r requirements.txt   //mlagents usw von requirements.txt installieren
+4. testen mit "mlagents-learn --help"
