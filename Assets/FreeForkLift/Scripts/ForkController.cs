@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ForkController : MonoBehaviour {
 
@@ -32,26 +33,30 @@ public class ForkController : MonoBehaviour {
             mastMoveTrue = false;
         }
       
-        if (Input.GetKey(KeyCode.PageUp))
+        var keyboard = Keyboard.current;
+        if (keyboard != null)
         {
-           //fork.Translate(Vector3.up * speedTranslate * Time.deltaTime);
-            fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, maxY, speedTranslate * Time.deltaTime);
-            if(mastMoveTrue)
+            if (keyboard.pageUpKey.isPressed)
             {
-                mast.transform.localPosition = Vector3.MoveTowards(mast.transform.localPosition, maxYmast, speedTranslate * Time.deltaTime);
+               //fork.Translate(Vector3.up * speedTranslate * Time.deltaTime);
+                fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, maxY, speedTranslate * Time.deltaTime);
+                if(mastMoveTrue)
+                {
+                    mast.transform.localPosition = Vector3.MoveTowards(mast.transform.localPosition, maxYmast, speedTranslate * Time.deltaTime);
+                }
+              
             }
-          
-        }
-        if (Input.GetKey(KeyCode.PageDown))
-        {
-            fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, minY, speedTranslate * Time.deltaTime);
-
-            if (mastMoveTrue)
+            if (keyboard.pageDownKey.isPressed)
             {
-                mast.transform.localPosition = Vector3.MoveTowards(mast.transform.localPosition, minYmast, speedTranslate * Time.deltaTime);
+                fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, minY, speedTranslate * Time.deltaTime);
+
+                if (mastMoveTrue)
+                {
+                    mast.transform.localPosition = Vector3.MoveTowards(mast.transform.localPosition, minYmast, speedTranslate * Time.deltaTime);
+
+                }
 
             }
-
         }
 
     }
