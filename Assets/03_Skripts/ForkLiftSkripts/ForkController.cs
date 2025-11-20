@@ -2,9 +2,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class ForkController : MonoBehaviour {
+public class ForkController : MonoBehaviour
+{
 
-    public Transform fork; 
+    public Transform fork;
     public Transform mast;
     public float speedTranslate; //Platform travel speed
     public Vector3 maxY; //The maximum height of the platform
@@ -15,10 +16,11 @@ public class ForkController : MonoBehaviour {
     private bool mastMoveTrue = false; //Activate or deactivate the movement of the mast
 
     // Update is called once per frame
-    void FixedUpdate () {
+    void FixedUpdate()
+    {
 
         Debug.Log(mastMoveTrue);
-        if(fork.transform.localPosition.y >= maxYmast.y && fork.transform.localPosition.y < maxY.y)
+        if (fork.transform.localPosition.y >= maxYmast.y && fork.transform.localPosition.y < maxY.y)
         {
             mastMoveTrue = true;
         }
@@ -32,21 +34,21 @@ public class ForkController : MonoBehaviour {
         {
             mastMoveTrue = false;
         }
-      
+
         var keyboard = Keyboard.current;
         if (keyboard != null)
         {
-            if (keyboard.pageUpKey.isPressed)
+            if (keyboard.upArrowKey.isPressed)
             {
-               //fork.Translate(Vector3.up * speedTranslate * Time.deltaTime);
+                //fork.Translate(Vector3.up * speedTranslate * Time.deltaTime);
                 fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, maxY, speedTranslate * Time.deltaTime);
-                if(mastMoveTrue)
+                if (mastMoveTrue)
                 {
                     mast.transform.localPosition = Vector3.MoveTowards(mast.transform.localPosition, maxYmast, speedTranslate * Time.deltaTime);
                 }
-              
+
             }
-            if (keyboard.pageDownKey.isPressed)
+            if (keyboard.downArrowKey.isPressed)
             {
                 fork.transform.localPosition = Vector3.MoveTowards(fork.transform.localPosition, minY, speedTranslate * Time.deltaTime);
 
