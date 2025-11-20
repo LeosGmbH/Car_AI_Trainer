@@ -6,6 +6,9 @@ TagManager:
   tags:
   - ground
   - pallet
+  - wall
+  - target
+  - dropZone
   layers:
   - Default
   - TransparentFX
@@ -16,7 +19,7 @@ TagManager:
   - Player
   - Pallet
   - Ground
-  - 
+  - DropZone
   - 
   - 
   - 

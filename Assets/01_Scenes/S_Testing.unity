@@ -203,6 +203,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 93117141}
   m_CullTransparentMesh: 0
+--- !u!1 &599937406
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 599937407}
+  - component: {fileID: 599937408}
+  m_Layer: 9
+  m_Name: DropZone
+  m_TagString: dropZone
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &599937407
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599937406}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.4, y: 0, z: 10.45}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7445167090662982540}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &599937408
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599937406}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 5, y: 5, z: 5}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &950271623
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,7 +947,7 @@ Transform:
   m_GameObject: {fileID: 7954891973550418809}
   serializedVersion: 2
   m_LocalRotation: {x: 0.25340128, y: 0.00000012359125, z: -0.000000032374857, w: 0.9673613}
-  m_LocalPosition: {x: 0.06, y: 3.42, z: -3.62}
+  m_LocalPosition: {x: 0.06, y: 3.42, z: 3.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2405,6 +2458,7 @@ GameObject:
   - component: {fileID: 6619695123234130838}
   - component: {fileID: 6619695123234130837}
   - component: {fileID: 6619695123234130836}
+  - component: {fileID: 6619695123234130841}
   m_Layer: 6
   m_Name: Forklift
   m_TagString: Untagged
@@ -2479,15 +2533,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: RayFront
-  m_DetectableTags: []
+  m_SensorName: PallettRay
+  m_DetectableTags:
+  - pallet
   m_RaysPerDirection: 20
   m_MaxRayDegrees: 180
   m_SphereCastRadius: 0.45
   m_RayLength: 60
   m_RayLayerMask:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 128
   m_ObservationStacks: 3
   rayHitColor: {r: 1, g: 0, b: 0.8169584, a: 1}
   rayMissColor: {r: 1, g: 1, b: 1, a: 1}
@@ -2580,6 +2635,33 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &6619695123234130841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6304474325930185757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Sensors.RayPerceptionSensorComponent3D
+  m_SensorName: DropZoneRay
+  m_DetectableTags:
+  - dropZone
+  m_RaysPerDirection: 3
+  m_MaxRayDegrees: 180
+  m_SphereCastRadius: 0.5
+  m_RayLength: 60
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
+  m_ObservationStacks: 3
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 0, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 1
+  m_EndVerticalOffset: 1
 --- !u!23 &6666502522857101042
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2787,6 +2869,7 @@ Transform:
   - {fileID: 6918593673911687373}
   - {fileID: 558169424553028955}
   - {fileID: 7742732848557964028}
+  - {fileID: 599937407}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &7452179175315173986
@@ -2943,7 +3026,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &7954891973550418809
 GameObject:
   m_ObjectHideFlags: 0
@@ -3187,8 +3270,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parkourAgent: {fileID: 0}
-  buttonController: {fileID: 0}
-  enviromentController: {fileID: 0}
 --- !u!1 &9084587988588743733
 GameObject:
   m_ObjectHideFlags: 0
