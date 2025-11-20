@@ -4,10 +4,8 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Vehicle
-  - target
   - ground
-  - wall
+  - pallet
   layers:
   - Default
   - TransparentFX
@@ -15,9 +13,9 @@ TagManager:
   - 
   - Water
   - UI
-  - ForkLift
+  - Player
   - Pallet
-  - 
+  - Ground
   - 
   - 
   - 
