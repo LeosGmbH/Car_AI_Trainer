@@ -41,3 +41,18 @@ Extensions for 4 manual training command :
 //fertiges Modell laufen lassen ohne Training,in Trainingsumgebung für vergleich zu generalisierung : 
 
 mlagents-learn config\Configname.yaml --run-id=(name) --env="Builds\name.exe" --inference --initialize-from=name_in_Results_Folder
+
+
+
+
+
+
+
+mlagents-learn config\DefaultManuell.yaml  --run-id=Test01 --force --env="Builds\Car_AI_Tainer.exe"
+
+
+
+
+
+
+

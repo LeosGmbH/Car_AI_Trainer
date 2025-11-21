@@ -1,0 +1,42 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1763691953",
+        "python_version": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+        "command_line_arguments": "E:\\LEO_X9\\Projekte\\Unity\\Car_AI_Trainer\\venv\\Scripts\\mlagents-learn config\\DefaultManuell.yaml --run-id=Test01 --force",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.6.0+cpu",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1763691963"
+    },
+    "total": 10.585854899996775,
+    "count": 1,
+    "self": 0.014556499998434447,
+    "children": {
+        "run_training.setup": {
+            "total": 0.19872449999820674,
+            "count": 1,
+            "self": 0.19872449999820674
+        },
+        "TrainerController.start_learning": {
+            "total": 10.372573900000134,
+            "count": 1,
+            "self": 8.309999975608662e-05,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 10.372472000002745,
+                    "count": 1,
+                    "self": 10.372472000002745
+                },
+                "TrainerController._save_models": {
+                    "total": 1.8799997633323073e-05,
+                    "count": 1,
+                    "self": 1.8799997633323073e-05
+                }
+            }
+        }
+    }
+}

@@ -229,7 +229,7 @@ Transform:
   m_GameObject: {fileID: 599937406}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.44, y: 2.41, z: -10.68}
+  m_LocalPosition: {x: -4.3, y: 2.41, z: -5.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -270,7 +270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.76
+      value: 9.44
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.y
@@ -278,7 +278,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -12.76
+      value: -3.89
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2482,7 +2482,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.24
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2490,7 +2490,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.53
+      value: 6.26
       objectReference: {fileID: 0}
     - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2717,7 +2717,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 800
+  MaxStep: 4000
   dropZoneTransform: {fileID: 599937407}
   palletParent: {fileID: 4752343406533802896}
   forkTransform: {fileID: 2719456789835016828}
@@ -2751,7 +2751,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 543407ac455e3d04ea6871e6eeae6f62, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: ForkLiftAgent
   TeamId: 0
   m_UseChildSensors: 1
