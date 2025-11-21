@@ -1,4 +1,5 @@
 using Assets.Skripts;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -48,32 +49,22 @@ public class DebugVisualizer : MonoBehaviour
 
 
         StringBuilder builder = new StringBuilder();
+
         if (mLAgentController != null)
         {
-            // Hole das Dictionary
-            var debugInfo = mLAgentController.GetDebugInformations();
-
-            // Iteriere durch alle Einträge und füge sie dem Builder hinzu
-            foreach (var kvp in debugInfo)
-            {
-                builder.AppendLine($"{kvp.Key}: {kvp.Value}");
-            }
+            builder.AppendLine("##  ML Agent Steuerung ##"); // Haupttitel
+            AppendDebugInfo(builder, mLAgentController.GetDebugInformations());
         }
+
         if (movementController != null)
         {
-            builder.AppendLine("--- MOVEMENT ---");
-            foreach (var kvp in movementController.GetDebugInformations())
-            {
-                builder.AppendLine($"{kvp.Key}: {kvp.Value}");
-            }
+            builder.AppendLine("\n##  Bewegungs-Controller ##"); // Haupttitel
+            AppendDebugInfo(builder, movementController.GetDebugInformations());
         }
-
-
-
 
 
         float height = labelStyle.CalcHeight(new GUIContent(builder.ToString()), panelWidth);
-        Vector2 size = new Vector2(panelWidth, height + 20f);
+        Vector2 size = new Vector2(panelWidth, height + 22f);
 
         Rect rect = new Rect(hudPosition, size);
         Color oldColor = GUI.color;
@@ -82,5 +73,23 @@ public class DebugVisualizer : MonoBehaviour
         GUI.color = oldColor;
         GUI.Label(new Rect(rect.x + 10f, rect.y + 6f, rect.width - 20f, rect.height - 12f), builder.ToString(), labelStyle);
     }
-   
+
+    private void AppendDebugInfo(StringBuilder builder, Dictionary<string, string> debugInfo)
+    {
+        // Iteriere durch alle Einträge und füge sie dem Builder hinzu
+        foreach (var kvp in debugInfo)
+        {
+            if (kvp.Key.StartsWith("---"))
+            {
+                // Hervorhebung für Sektionen wie "--- GABEL ---"
+                builder.AppendLine($"\n**{kvp.Key.Replace("-", "").Trim()}**");
+            }
+            else
+            {
+                // Standard-Debug-Eintrag
+                builder.AppendLine($"{kvp.Key}: **{kvp.Value}**");
+            }
+        }
+    }
+
 }

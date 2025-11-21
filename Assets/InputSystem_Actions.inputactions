@@ -1013,6 +1013,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Handbreak",
+                    "type": "Button",
+                    "id": "e1214eac-1d9a-4657-baba-b7cff6874bb0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1103,6 +1112,17 @@
                     "action": "Fork",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "0ad0c2e6-c179-4775-91c5-f971316197d5",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Handbreak",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

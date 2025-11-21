@@ -35,7 +35,7 @@ namespace Assets.Skripts
         public void SetInput(float move, float steer, float fork, float handbrake)
         {
             MoveInput = Mathf.Clamp(move, -1f, 1f);
-            SteerInput = Mathf.Clamp(steer, -1f, 1f);
+            SteerInput = Mathf.Clamp(-steer, -1f, 1f);
             ForkInput = Mathf.Clamp(fork, -1f, 1f);
             HandbrakeInput = Mathf.Clamp(handbrake, 0f, 1f);
         }
@@ -50,14 +50,24 @@ namespace Assets.Skripts
 
         public Dictionary<string, string> GetDebugInformations()
         {
+            float accel = Mathf.Max(0f, MoveInput);
+            float footbrake = Mathf.Abs(Mathf.Min(0f, MoveInput)); // Absoluter Wert
+
             return new Dictionary<string, string>
-    {
-        { "Move Input", MoveInput.ToString("F2") },
-        { "Steer Input", SteerInput.ToString("F2") },
-        { "Fork Input", ForkInput.ToString("F2") },
-        { "Calc. Accel", Mathf.Max(0f, MoveInput).ToString("F2") },
-        { "Calc. Brake", Mathf.Abs(Mathf.Min(0f, MoveInput)).ToString("F2") }
-    };
+            {
+                // --- ML AGENT INPUTS ---
+                { "--- ML INPUTS ---", "" },
+                { "Move Input", MoveInput.ToString("F2") },
+                { "Steer Input", SteerInput.ToString("F2") },
+                { "Fork Input", ForkInput.ToString("F2") },
+                { "Handbrake Input", HandbrakeInput.ToString("F2") },
+                
+                // --- BERECHNETE AKTIONEN ---
+                { "--- AUTO AKTIONEN ---", "" },
+                { "Accel", accel.ToString("F2") },
+                { "Foot Brake", footbrake.ToString("F2") },
+                { "Hand Brake (An)", (HandbrakeInput > 0.5f).ToString() }
+            };
         }
 
         private void ApplyForkInput()

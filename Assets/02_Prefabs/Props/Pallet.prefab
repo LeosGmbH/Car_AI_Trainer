@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 4735920328441109892}
   - component: {fileID: 8370673160416007423}
   - component: {fileID: 5386173678188926978}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Pallet
-  m_TagString: pallet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -99,9 +99,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8931993299500870755}
   - component: {fileID: 6474770705175682791}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Pallet
-  m_TagString: pallet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -115,7 +115,7 @@ Transform:
   m_GameObject: {fileID: 4489496832641437754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 8.53}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -161,9 +161,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8394088110706171564}
   - component: {fileID: 4594738308394501944}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: BoxCollider
-  m_TagString: pallet
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -280,8 +280,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 54000010019582510, guid: a4a7e963b130e7c41b17410f226fb86c, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

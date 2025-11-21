@@ -87,17 +87,40 @@ public class MLAgentController : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // 1. Aktionen extrahieren
         float moveInput = actions.ContinuousActions[0];
         float rotateInput = actions.ContinuousActions[1];
         float forkInput = actions.ContinuousActions[2];
         float handbrakeInput = actions.ContinuousActions[3];
 
+        // 2. Aktionen ausführen
         playerMovement.SetInput(moveInput, rotateInput, forkInput, handbrakeInput);
 
+        // 3. Belohnungslogik anwenden (ausgelagert)
+        ApplyRewardLogic(forkInput);
+
+        // 4. Episoden-Ende prüfen
+        if (dropZoneManager.IsComplete(totalPalletsInScene))
+        {
+            Debug.LogError($"EPISODE ENDE ZU FRÜH ERKANNT! " +
+                           $"Erwartet: {totalPalletsInScene}. " +
+                           $"Aktuell gezählt: {dropZoneManager.GetCount()}");
+            ReachGoal();
+        }
+
+        if (StepCount >= MaxStep)
+        {
+            Die();
+            Debug.Log("Died, Steps überschritten");
+        }
+    }
+
+    private void ApplyRewardLogic(float forkInput)
+    {
         // 1. Zeitstrafe (existentiell)
         AddReward(-0.001f);
 
-        // Bestraft unnötiges Hoch- und Runterfahren der Gabel.
+        // 2. Energie-Strafe für unnötige Gabelbewegung (Anti-Jitter)
         if (Mathf.Abs(forkInput) > 0.1f)
         {
             AddReward(-0.0005f * Mathf.Abs(forkInput));
@@ -108,31 +131,18 @@ public class MLAgentController : Agent
 
         if (currentCount > lastFramePalletCount)
         {
-            // Hohe Belohnung, da dies der Hauptziel-Erfolg ist. Eine NEUE Palette ist sicher in der Zone
+            // ERFOLG: Eine NEUE Palette ist sicher in der Zone!
             AddReward(1.0f);
             Debug.Log("Palette secured!");
         }
         else if (currentCount < lastFramePalletCount)
         {
             // MISSERFOLG: Eine Palette ist aus der Zone gefallen!
-            // Hohe Strafe, um sofortiges Zurückholen zu erzwingen.
             AddReward(-1.0f);
             Debug.Log("Palette lost and must be re-collected!");
         }
 
         lastFramePalletCount = currentCount; // Status für nächsten Frame speichern
-
-        // 4. Spiel gewonnen?
-        if (dropZoneManager.IsComplete(totalPalletsInScene))
-        {
-            ReachGoal();
-        }
-
-        if (StepCount >= MaxStep)
-        {
-            Die();
-            Debug.Log("Died, Steps überschritten");
-        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -177,20 +187,44 @@ public class MLAgentController : Agent
         EndEpisode();
     }
 
+    public void AddAgentReward(float ammount)
+    {
+        AddReward(ammount);
+    }
 
 
     public Dictionary<string, string> GetDebugInformations()
     {
+        // Limits für Normalisierung (aus der Klasse)
+        float minY = 0.0f;
+        float maxY = 2.0f;
+        float forkNorm = (forkTransform.localPosition.y - minY) / (maxY - minY);
 
         return new Dictionary<string, string>
         {
-            { "Is Pallet Touched", IsPalletTouched.ToString() }, // NEU
-            { "Is Pallet Lifted", IsPalletLifted.ToString() },   // NEU
-            { "Player Pos", transform.position.ToString("F2") },
+            // --- ALLGEMEIN ---
+            { "--- AGENT ZUSTAND ---", "" },
             { "Cum. Reward", GetCumulativeReward().ToString("F4") },
             { "Steps", $"{StepCount} / {MaxStep}" },
+            { "Total Paletten", totalPalletsInScene.ToString() },
+            { "Gesicherte Paletten", dropZoneManager.GetCount().ToString() },
+
+            // --- FAHRZEUG PHYSIK ---
+            { "--- PHYSIK ---", "" },
             { "Velocity (m/s)", rb.linearVelocity.magnitude.ToString("F2") },
-            { "Fork Height", forkTransform.localPosition.y.ToString("F2") }
+            { "Angular Vel. (Y)", rb.angularVelocity.y.ToString("F2") },
+            { "Player Pos", transform.position.ToString("F2") },
+
+            // --- GABEL STATUS ---
+            { "--- GABEL ---", "" },
+            { "Gabel Höhe (Y)", forkTransform.localPosition.y.ToString("F2") },
+            { "Gabel Höhe (Norm)", Mathf.Clamp(forkNorm, 0f, 1f).ToString("F2") },
+            { "Pal. Berührt (IsPalletTouched)", IsPalletTouched.ToString() },
+            { "Pal. Angehoben (IsPalletLifted)", IsPalletLifted.ToString() },
+
+            // --- BELOHNUNG (OBSERVATION ZUM FORTSCHRITT) ---
+            { "--- FORTSCHRITT ---", "" },
+            { "Fortschritt (Obs.)", ((float)dropZoneManager.GetCount() / totalPalletsInScene).ToString("F2") }
         };
     }
 

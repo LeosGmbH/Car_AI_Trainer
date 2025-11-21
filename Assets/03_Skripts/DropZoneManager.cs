@@ -10,7 +10,7 @@ public class DropZoneManager : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Pallet"))
+        if (other.CompareTag("pallet"))
         {
             GameObject pallet = other.gameObject;
             if (!palletsInZone.Contains(pallet))
@@ -22,7 +22,7 @@ public class DropZoneManager : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Pallet"))
+        if (other.CompareTag("pallet"))
         {
             GameObject pallet = other.gameObject;
             if (palletsInZone.Contains(pallet))

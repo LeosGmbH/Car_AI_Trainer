@@ -14,6 +14,10 @@ public class CheckPalletCollider : MonoBehaviour
             // Setzt IsPalletLifted nur auf true, wenn berührt UND hoch genug
             bool isForkHighEnough = mlAgentController.forkTransform.localPosition.y > carryingHeightThreshold;
             mlAgentController.IsPalletLifted = isForkHighEnough;
+            if(isForkHighEnough)
+            {
+                 mlAgentController.AddAgentReward(0.2f);
+            }
         }
         else
         {
@@ -25,7 +29,7 @@ public class CheckPalletCollider : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Setzt den Berührungsstatus
-        if (other.CompareTag("Pallet") || other.CompareTag("pallet"))
+        if ( other.CompareTag("pallet"))
         {
             mlAgentController.IsPalletTouched = true;
         }
@@ -34,7 +38,7 @@ public class CheckPalletCollider : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         // Berührungsstatus beendet
-        if (other.CompareTag("Pallet") || other.CompareTag("pallet"))
+        if ( other.CompareTag("pallet"))
         {
             mlAgentController.IsPalletTouched = false;
         }
