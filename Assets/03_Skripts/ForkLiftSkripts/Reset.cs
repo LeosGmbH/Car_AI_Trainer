@@ -15,11 +15,11 @@ public class Reset : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
-        if(Input.GetKeyDown(KeyCode.R))
-        {
-            // _tr.rotation = new Quaternion(0,90,0,0);
-            // transform.position = curPos;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        //if(Input.GetKeyDown(KeyCode.R))
+        //{
+        //    // _tr.rotation = new Quaternion(0,90,0,0);
+        //    // transform.position = curPos;
+        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        //}
 	}
 }

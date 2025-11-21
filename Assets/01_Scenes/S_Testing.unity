@@ -1450,7 +1450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fork: {fileID: 2719456789835016828}
   mast: {fileID: 1831997506766132083}
-  speedTranslate: 0.2
+  speedTranslate: 1
   maxY: {x: 0, y: 2.85, z: 0}
   minY: {x: 0, y: -0.02, z: 0}
   maxYmast: {x: 0, y: 1.8, z: 0}
@@ -2497,7 +2497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colWheels: 4
-  m_CarSteerType: 0
+  m_CarSteerType: 1
   m_CarDriveType: 2
   m_WheelColliders:
   - {fileID: 8244969677023082872}
@@ -2510,7 +2510,7 @@ MonoBehaviour:
   - {fileID: 3264482420737128037}
   - {fileID: 5023018269289744929}
   m_CentreOfMassOffset: {x: 0, y: 0, z: 0}
-  m_MaximumSteerAngle: 30
+  m_MaximumSteerAngle: 40
   m_SteerHelper: 0.644
   m_TractionControl: 1
   m_FullTorqueOverAllWheels: 1400
@@ -2518,7 +2518,7 @@ MonoBehaviour:
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 30
   m_SpeedType: 1
-  m_Topspeed: 20
+  m_Topspeed: 40
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.3
   m_BrakeTorque: 20000
@@ -2556,26 +2556,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6304474325930185757}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: beba85b2019c0114bb16685b36b59855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 10
-  runSpeed: 15
-  rotationSpeed: 20
-  jumpForce: 30
-  fallMultiplier: 10
-  groundCheckDistance: 0.1
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  wall: wall
-  killPlayerTag: killPlayer
-  isGrounded: 0
-  playerColor: {fileID: 0}
-  h3dMoveReward: 0
-  wallReward: 0
+  pallet: pallet
+  dropZone: dropZone
 --- !u!114 &6619695123234130838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2597,7 +2584,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6304474325930185757}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5130527f20038e141a0c586283b24f53, type: 3}
   m_Name: 
@@ -2605,14 +2592,12 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
-  dropZoneTransform: {fileID: 0}
-  forkTransform: {fileID: 0}
-  palletParent: {fileID: 0}
-  minY: 0
-  maxY: 2
-  moveSpeed: 5
-  rotateSpeed: 200
+  MaxStep: 800
+  dropZoneTransform: {fileID: 599937407}
+  palletParent: {fileID: 4752343406533802896}
+  forkTransform: {fileID: 2719456789835016828}
+  minY: 2.85
+  maxY: -0.02
   distanceRewardFactor: 0.01
 --- !u!114 &6619695123234130840
 MonoBehaviour:

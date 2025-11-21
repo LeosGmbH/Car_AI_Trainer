@@ -13,7 +13,6 @@ namespace Assets.Skripts
 
 
         // Component references
-        private Rigidbody rb;
         private MLAgentController movementMLAgent;
 
 
@@ -24,11 +23,6 @@ namespace Assets.Skripts
         private void Awake()
         {
             movementMLAgent = GetComponent<MLAgentController>();
-            rb = GetComponent<Rigidbody>();
-
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         }
 
 

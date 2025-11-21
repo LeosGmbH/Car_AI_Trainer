@@ -16,8 +16,8 @@ public class MLAgentController : Agent
 
     [Header("Referenzen")]
     public Transform dropZoneTransform;
-    public Transform forkTransform; // Referenz zur Gabel
-    public Transform palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
+    public GameObject palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
+    public Transform forkTransform; // Transform der Gabel-Plattform
     private MovementController playerMovement;
 
 
@@ -25,10 +25,6 @@ public class MLAgentController : Agent
     public float minY = 0.0f;
     public float maxY = 2.0f;
 
-
-    [Header("Einstellungen")]
-    public float moveSpeed = 5f;
-    public float rotateSpeed = 200f;
 
     [Header("RL Settings")]
     public float distanceRewardFactor = 0.01f; // Dein "K" Faktor
@@ -83,7 +79,7 @@ public class MLAgentController : Agent
         sensor.AddObservation(IsCarryingPallet);
 
         // 4. Gabel-Höhe (1) - Wichtig für das Netz zu wissen, wann Aufnahme möglich ist
-        float currentH = forkTransform.localPosition.y; // Oder aus Controller lesen
+        float currentH = forkTransform.position.y;// Oder aus Controller lesen
         sensor.AddObservation((currentH - minY) / (maxY - minY));
         sensor.AddObservation((int)currentSearchState);
     }
@@ -118,18 +114,18 @@ public class MLAgentController : Agent
 
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-        // Manuelle Steuerung für Testzwecke (Mapping auf Ihre Tasten)
-        var continuousActions = actionsOut.ContinuousActions;
-        continuousActions[0] = Input.GetAxis("Vertical");   // W/S
-        continuousActions[1] = Input.GetAxis("Horizontal"); // A/D
+    //public override void Heuristic(in ActionBuffers actionsOut)
+    //{
+    //    // Manuelle Steuerung für Testzwecke (Mapping auf Ihre Tasten)
+    //    var continuousActions = actionsOut.ContinuousActions;
+    //    continuousActions[0] = Input.GetAxis("Vertical");   // W/S
+    //    continuousActions[1] = Input.GetAxis("Horizontal"); // A/D
 
-        float fork = 0f;
-        if (Input.GetKey(KeyCode.UpArrow)) fork = 1f;
-        else if (Input.GetKey(KeyCode.DownArrow)) fork = -1f;
-        continuousActions[2] = fork;
-    }
+    //    float fork = 0f;
+    //    if (Input.GetKey(KeyCode.UpArrow)) fork = 1f;
+    //    else if (Input.GetKey(KeyCode.DownArrow)) fork = -1f;
+    //    continuousActions[2] = fork;
+    //}
 
     public void AddAgentReward(float reward)
     {
@@ -207,7 +203,7 @@ public class MLAgentController : Agent
             IsCarryingPallet = false;
 
             // Palette lösen/zerstören
-           // forkliftController.DetachAndDestroyPallet();
+            // forkliftController.DetachAndDestroyPallet();
 
             AddReward(5.0f);
             FindClosestPallet();
@@ -224,8 +220,14 @@ public class MLAgentController : Agent
 
     private void FindClosestPallet()
     {
-        // (Hier gleiche Suchlogik wie zuvor)
-        GameObject[] allPallets = GameObject.FindGameObjectsWithTag("Pallet");
+
+        List<GameObject> allPallets = new List<GameObject>();
+
+        foreach (Transform child in palletParent.transform)
+        {
+            allPallets.Add(child.gameObject);
+        }
+
         GameObject closest = null;
         float minDst = Mathf.Infinity;
         foreach (GameObject p in allPallets)
