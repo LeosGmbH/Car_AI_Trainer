@@ -59,8 +59,6 @@ public class MLAgentController : Agent
         raySensors = GetComponents<RayPerceptionSensorComponent3D>(); // Holt ALLE Ray Perception Sensoren im GameObject
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
-        //levelManager = FindAnyObjectByType<LevelManager>();
-        playerMovement.SetControlMode(false);
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -92,22 +90,11 @@ public class MLAgentController : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float moveX = actions.ContinuousActions[0];
-        float moveZ = actions.ContinuousActions[1];
-        bool jump = actions.DiscreteActions[0] == 1; // 1 for jump, 0 for no jump
-        bool run = actions.DiscreteActions[1] == 1; // 1 for jump, 0 for no jump
-        playerMovement.SetMovement(moveX, moveZ, run, jump);
-
         if (StepCount >= MaxStep)
         {
             Die();
             Debug.Log("Died, Steps �berschritten");
         }
-
-
-
-
-
         //new
 
         // --- Aktionen an Ihr Controller-Skript weiterleiten ---
@@ -173,7 +160,6 @@ public class MLAgentController : Agent
         AddReward(timeBonus);
         AddReward(10f);
         EndEpisode();
-        playerMovement.playerColor.color = Color.green;
 
     }
 

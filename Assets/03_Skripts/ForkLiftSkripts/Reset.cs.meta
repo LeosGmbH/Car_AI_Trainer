@@ -15,5 +15,5 @@ AssetOrigin:
   productId: 80275
   packageName: Controllable Forklift Free
   packageVersion: 1.1
-  assetPath: Assets/FreeForkLift/Scripts/Reset.cs
+  assetPath: Assets/03_Skripts/ForkLiftSkripts/Reset.cs
   uploadId: 302578
