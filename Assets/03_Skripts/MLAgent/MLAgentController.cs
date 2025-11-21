@@ -116,7 +116,7 @@ public class MLAgentController : Agent
         float forkInput = actions.ContinuousActions[2];   // -1 bis 1
 
         // Rufen Sie hier Ihre Methoden auf. Beispiel:
-        forkliftController.SetInput(moveInput, rotateInput, forkInput);
+        playerMovement.SetInput(moveInput, rotateInput, forkInput);
 
         // --- Belohnungen ---
         AddReward(-0.001f); // Time Penalty
@@ -209,7 +209,7 @@ public class MLAgentController : Agent
             IsCarryingPallet = true;
 
             // Physik-Logik zum "Anheften" der Palette hier oder im Controller aufrufen:
-            forkliftController.AttachPallet(other.gameObject);
+            //playerMovement.AttachPallet(other.gameObject);
 
             AddReward(1.0f);
             previousDistanceToTarget = Vector3.Distance(transform.position, dropZoneTransform.position);
@@ -221,7 +221,7 @@ public class MLAgentController : Agent
             IsCarryingPallet = false;
 
             // Palette lösen/zerstören
-            forkliftController.DetachAndDestroyPallet();
+           // forkliftController.DetachAndDestroyPallet();
 
             AddReward(5.0f);
             FindClosestPallet();

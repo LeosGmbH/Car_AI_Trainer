@@ -49,7 +49,7 @@ namespace Assets.Skripts
             rb = GetComponent<Rigidbody>();
             sphereCollider = GetComponent<SphereCollider>();
 
-            
+
             rb.constraints = RigidbodyConstraints.FreezeRotation;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
@@ -156,10 +156,10 @@ namespace Assets.Skripts
             manualControl = false;
             horizontalInput = Mathf.Clamp(horizontalMovement, -1f, 1f); //left/right movement
             verticalInput = Mathf.Clamp(verticalMovement, -1f, 1f); //forward/backward movement
-            isRunning = shouldRun; 
+            isRunning = shouldRun;
             jumpInput = shouldJump;
         }
-       
+
         public void SetControlMode(bool useManualControl)
         {
             manualControl = useManualControl;
@@ -181,5 +181,31 @@ namespace Assets.Skripts
         {
             return rb.linearVelocity;
         }
+
+
+
+
+        ////////////////////////////////////////////////////////
+        //////////// NEW //////////////////
+        ////////////////////////////////////////////////////////
+
+
+
+
+        // In Ihrem ForkliftController.cs
+        public float MoveInput { get; private set; }
+        public float SteerInput { get; private set; }
+        public float ForkInput { get; private set; }
+
+        public void SetInput(float move, float steer, float fork)
+        {
+            MoveInput = move;
+            SteerInput = steer;
+            ForkInput = fork;
+        }
+
+
+
+
     }
 }

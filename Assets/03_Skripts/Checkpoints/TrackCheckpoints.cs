@@ -24,7 +24,6 @@ public class TrackCheckpoints : MonoBehaviour
         }
         nextCheckpointSingleIndex = 0;
         checkPointSingleList[nextCheckpointSingleIndex].gameObject.SetActive(true);
-        parkourAgent.SetTargetTransformObject(checkPointSingleList[nextCheckpointSingleIndex].transform);
     }
     public void PlayerThroughCheckpoint(SingleCheckpoint checkpointSingle)
     {
@@ -32,7 +31,6 @@ public class TrackCheckpoints : MonoBehaviour
         if (currentIndex == nextCheckpointSingleIndex)
         {
             nextCheckpointSingleIndex = (nextCheckpointSingleIndex + 1) % checkPointSingleList.Count;
-            parkourAgent.SetTargetTransformObject(checkPointSingleList[nextCheckpointSingleIndex].transform);
             if (checkpointSingle.gameObject.name != "BtnPress") //für Lvl 3
             {
                 checkpointSingle.gameObject.SetActive(false);
@@ -53,7 +51,6 @@ public class TrackCheckpoints : MonoBehaviour
     public void ResetCheckPoints()
     {
         nextCheckpointSingleIndex = 0;
-        parkourAgent.SetTargetTransformObject(checkPointSingleList[nextCheckpointSingleIndex].transform);
         foreach (Transform checkPointSingleTransform in gameObject.transform)
         {
             checkPointSingleTransform.gameObject.SetActive(false);
