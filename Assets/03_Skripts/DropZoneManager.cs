@@ -8,6 +8,12 @@ public class DropZoneManager : MonoBehaviour
 
     public bool IsComplete(int totalExpected) => palletsInZone.Count >= totalExpected;
 
+    public bool IsAgentInDropZone(Vector3 position)
+    {
+        Collider zoneCollider = GetComponent<Collider>();
+        return zoneCollider.bounds.Contains(position);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("pallet"))

@@ -1,0 +1,72 @@
+KI CODE-GENERIERUNGS-PROMPT: OPTIMIERUNG DER ML-AGENT BELOHNUNGSFUNKTION
+Ziel: Implementiere die folgenden Änderungen in der Klasse MLAgentController, um das Lernen und die Strategieentwicklung des Gabelstapler-Agenten zu verbessern.
+I. ANPASSUNGEN DER KLASSENSTRUKTUR
+Füge folgende private Variablen am Anfang der Klasse hinzu:
+private Transform[] closestPallets = new Transform[5];
+private float lastDistanceToClosestPallet = float.MaxValue;
+private float[] lastActions = new float[4];
+NEUE HILFSFUNKTION: FIND CLOSEST PALLET
+Definiere eine private Funktion FindClosestPallet(), die:
+Alle ungesicherten Paletten (unter palletParent) identifiziert.
+Die Distanz jeder ungesicherten Palette zum Agenten misst.
+Den Transform der nächstgelegenen ungesicherten Palette in die Variable closestPallets[0] speichert.
+Die Transforms der vier weiteren nächstgelegenen Paletten in closestPallets[1] bis [4] speichert.
+II. COLLECT OBSERVATIONS ERWEITERUNG
+Erweitere die Methode CollectObservations:
+Führe die Funktion FindClosestPallet() aus.
+Iteriere über das Array closestPallets (von 0 bis 4).
+Für jede gefundene Palette:
+a. Füge die relative Position der Palette zum Agenten (nur X und Z) als normalisierten Float hinzu (mit sensor.AddObservation).
+b. Füge den Zustand der Palette hinzu (z.B. 1.0f für ungesichert).
+III. ON ACTION RECEIVED ÄNDERUNGEN
+Am Ende der Methode OnActionReceived (nach dem Aufruf von ApplyRewardLogic):
+Speichere die aktuellen ContinuousActions [0] bis [3] in das Array lastActions.
+IV. APPLY REWARD LOGIC NEU-IMPLEMENTIERUNG
+Passe die Methode ApplyRewardLogic(float forkInput) wie folgt an:
+Entferne die alte Gabel-Jitter-Strafe (die forkInput verwendet).
+Behalte die Basis-Zeitstrafe bei: AddReward(-0.001f);
+Behalte die Haupt-Paletten-Logik bei (Belohnung/Strafe für currentCount vs. lastFramePalletCount).
+A. BELOHNUNG FÜR FAHRTÄTIGKEIT (ANTI-STILLSTAND)
+Belohne Bewegung, um Stehenbleiben zu verhindern:
+if (rb.linearVelocity.magnitude > 0.1f)
+{
+AddReward(0.003f);
+}
+B. STRATEGISCHE ANNÄHERUNG
+Belohnt die Annäherung an das nächstgelegene unbesicherte Ziel:
+float currentDistance = Vector3.Distance(transform.position, closestPallets[0].position);
+if (lastDistanceToClosestPallet != float.MaxValue)
+{
+float distanceDelta = lastDistanceToClosestPallet - currentDistance;
+AddReward(0.01f * distanceDelta);
+}
+lastDistanceToClosestPallet = currentDistance;
+C. GABEL-POSITIONS-LOGIK
+Definiere forkNorm als normalisierte Gabelhöhe $[0, 1]$. Definiere isPalletHeld als IsPalletLifted. Definiere isInDropZone durch einen Aufruf im dropZoneManager (Annahme: die Funktion dropZoneManager.IsAgentInDropZone(transform.position) existiert).
+KEINE PALETTE GEHALTEN (isPalletHeld == false)
+Belohnung für Gabel unten (bereit zur Aufnahme): AddReward(0.002f * (1.0f - forkNorm));
+Strafe für Gabel oben (ineffizient ohne Palette): AddReward(-0.001f * forkNorm);
+PALETTE GEHALTEN (isPalletHeld == true)
+TRANSPORT (Nicht in DropZone):
+Belohnung für Gabel oben (sicherer Transport): AddReward(0.002f * forkNorm);
+Strafe für Gabel unten (Gefahr der Kollision): AddReward(-0.001f * (1.0f - forkNorm));
+IN DROPZONE (Vorbereitung zum Absetzen):
+Hohe Belohnung für Gabel unten (bereit zum Absetzen): AddReward(0.005f * (1.0f - forkNorm));
+Hohe Strafe für Gabel oben (verhindert das Absetzen): AddReward(-0.005f * forkNorm);
+D. STRAFEN FÜR STILLSTAND UND JITTER
+Stillstands-Strafe:
+if (rb.linearVelocity.magnitude < 0.1f)
+{
+AddReward(-0.005f);
+}
+Anti-Jitter/Steuerungs-Stabilität (Bestraft schnelle Aktionswechsel):
+float jitterPenalty = 0f;
+if (lastActions[0] != 0f)
+{
+for (int i = 0; i < 4; i++)
+{
+jitterPenalty += Mathf.Abs(actions.ContinuousActions[i] - lastActions[i]);
+}
+}
+AddReward(-0.002f * jitterPenalty);
+

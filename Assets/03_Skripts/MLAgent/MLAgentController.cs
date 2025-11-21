@@ -34,6 +34,10 @@ public class MLAgentController : Agent
     private Rigidbody rb;
     private Vector3 startPos;
     private Vector3 forkStartPos;
+    private Transform[] closestPallets = new Transform[5];
+    private float lastDistanceToClosestPallet = float.MaxValue;
+    private float[] lastActions = new float[4];
+    private float[] currentActions = new float[4];
 
 
     private int totalPalletsInScene;
@@ -43,7 +47,7 @@ public class MLAgentController : Agent
     void Start()
     {
         startPos = transform.localPosition;
-        forkStartPos= forkTransform.localPosition;
+        forkStartPos = forkTransform.localPosition;
     }
 
     private void Awake()
@@ -54,6 +58,36 @@ public class MLAgentController : Agent
         // Zähle alle Paletten zu Beginn
         totalPalletsInScene = palletParent.transform.childCount;
     }
+
+    private void FindClosestPallet()
+    {
+        for (int i = 0; i < closestPallets.Length; i++)
+        {
+            closestPallets[i] = transform;
+        }
+
+        List<Transform> unsecuredPallets = new List<Transform>();
+        int childCount = palletParent.transform.childCount;
+        for (int i = 0; i < childCount; i++)
+        {
+            Transform child = palletParent.transform.GetChild(i);
+            if (!dropZoneManager.palletsInZone.Contains(child.gameObject))
+            {
+                unsecuredPallets.Add(child);
+            }
+        }
+
+        unsecuredPallets.Sort((a, b) =>
+            ((a.position - transform.position).sqrMagnitude)
+                .CompareTo((b.position - transform.position).sqrMagnitude));
+
+        int limit = Mathf.Min(closestPallets.Length, unsecuredPallets.Count);
+        for (int i = 0; i < limit; i++)
+        {
+            closestPallets[i] = unsecuredPallets[i];
+        }
+    }
+
 
     public override void OnEpisodeBegin()
     {
@@ -69,7 +103,16 @@ public class MLAgentController : Agent
         // NEU: DropZone leeren und Zähler zurücksetzen
         if (dropZoneManager != null) dropZoneManager.palletsInZone.Clear();
         lastFramePalletCount = 0;
-
+        lastDistanceToClosestPallet = float.MaxValue;
+        for (int i = 0; i < lastActions.Length; i++)
+        {
+            lastActions[i] = 0f;
+        }
+        for (int i = 0; i < currentActions.Length; i++)
+        {
+            currentActions[i] = 0f;
+        }
+        FindClosestPallet();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -91,6 +134,17 @@ public class MLAgentController : Agent
 
         // 4. Steuerung (1)
         sensor.AddObservation(rb.angularVelocity.y / 10f); // Normalisierte Drehgeschwindigkeit
+
+        FindClosestPallet();
+        for (int i = 0; i < closestPallets.Length; i++)
+        {
+            Transform pallet = closestPallets[i];
+            Vector3 relative = pallet.position - transform.position;
+            sensor.AddObservation(Mathf.Clamp(relative.x / 10f, -1f, 1f));
+            sensor.AddObservation(Mathf.Clamp(relative.z / 10f, -1f, 1f));
+            float state = pallet == transform ? 0f : 1f;
+            sensor.AddObservation(state);
+        }
     }
 
 
@@ -108,7 +162,17 @@ public class MLAgentController : Agent
 
         // 2. Aktionen ausführen
         playerMovement.SetInput(moveInput, rotateInput, forkInput, handbrakeInput);
-    
+
+        int actionCount = Mathf.Min(actions.ContinuousActions.Length, currentActions.Length);
+        for (int i = 0; i < actionCount; i++)
+        {
+            currentActions[i] = actions.ContinuousActions[i];
+        }
+        for (int i = actionCount; i < currentActions.Length; i++)
+        {
+            currentActions[i] = 0f;
+        }
+
         // 3. Belohnungslogik anwenden (ausgelagert)
         ApplyRewardLogic(forkInput);
 
@@ -126,9 +190,18 @@ public class MLAgentController : Agent
             Die();
             Debug.Log("Died, Steps überschritten");
         }
+
+        for (int i = 0; i < actionCount; i++)
+        {
+            lastActions[i] = actions.ContinuousActions[i];
+        }
+        for (int i = actionCount; i < lastActions.Length; i++)
+        {
+            lastActions[i] = 0f;
+        }
     }
 
-    
+
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -149,24 +222,21 @@ public class MLAgentController : Agent
         discreteActions[0] = forkInput > 0.5f ? 1 : forkInput < -0.5f ? 2 : 0;
         discreteActions[1] = handbrakeInput > 0.5f ? 1 : 0;
     }
-    
-private void ApplyRewardLogic(float forkInput)
+
+
+    private void ApplyRewardLogic(float forkInput)
     {
         // 1. Zeitstrafe (existentiell)
         AddReward(-0.001f);
 
-        // 2. Energie-Strafe für unnötige Gabelbewegung (Anti-Jitter)
-        if (Mathf.Abs(forkInput) > 0.1f)
-        {
-            AddReward(-0.0005f * Mathf.Abs(forkInput));
-        }
-
         // 3. Paletten Logik (Das Herzstück)
+
         int currentCount = dropZoneManager.GetCount();
 
         if (currentCount > lastFramePalletCount)
         {
             // ERFOLG: Eine NEUE Palette ist sicher in der Zone!
+
             AddReward(1.0f);
             Debug.Log("Palette secured!");
         }
@@ -178,7 +248,64 @@ private void ApplyRewardLogic(float forkInput)
         }
 
         lastFramePalletCount = currentCount; // Status für nächsten Frame speichern
+
+        if (rb.linearVelocity.magnitude > 0.1f)
+        {
+            AddReward(0.003f);
+        }
+
+        if (closestPallets[0] != transform)
+        {
+            float currentDistance = Vector3.Distance(transform.position, closestPallets[0].position);
+            if (lastDistanceToClosestPallet != float.MaxValue)
+            {
+                float distanceDelta = lastDistanceToClosestPallet - currentDistance;
+                AddReward(0.01f * distanceDelta);
+            }
+            lastDistanceToClosestPallet = currentDistance;
+        }
+        else
+        {
+            lastDistanceToClosestPallet = float.MaxValue;
+        }
+
+        float forkNorm = Mathf.Clamp01((forkTransform.localPosition.y - minY) / (maxY - minY));
+        bool isPalletHeld = IsPalletLifted;
+        bool isInDropZone = dropZoneManager.IsAgentInDropZone(transform.position);
+
+        if (!isPalletHeld)
+        {
+            AddReward(0.002f * (1.0f - forkNorm));
+            AddReward(-0.001f * forkNorm);
+        }
+        else if (!isInDropZone)
+        {
+            AddReward(0.002f * forkNorm);
+            AddReward(-0.001f * (1.0f - forkNorm));
+        }
+        else
+        {
+            AddReward(0.005f * (1.0f - forkNorm));
+            AddReward(-0.005f * forkNorm);
+        }
+
+        if (rb.linearVelocity.magnitude < 0.1f)
+        {
+            AddReward(-0.005f);
+        }
+
+        float jitterPenalty = 0f;
+        if (lastActions[0] != 0f)
+        {
+            int limit = Mathf.Min(currentActions.Length, lastActions.Length);
+            for (int i = 0; i < limit; i++)
+            {
+                jitterPenalty += Mathf.Abs(currentActions[i] - lastActions[i]);
+            }
+        }
+        AddReward(-0.002f * jitterPenalty);
     }
+
 
     public void Die()
     {
