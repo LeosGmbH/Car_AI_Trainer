@@ -14,6 +14,8 @@ public class MLAgentController : Agent
     public Transform dropZoneTransform;
     public GameObject palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
     public Transform forkTransform; // Transform der Gabel-Plattform
+    public Transform mastTransform; 
+
     private MovementController playerMovement;
     public EnviromentController enviromentController;
 
@@ -34,7 +36,8 @@ public class MLAgentController : Agent
     private Rigidbody rb;
     private Vector3 startPos;
     private Vector3 forkStartPos;
-    private Transform[] closestPallets = new Transform[5];
+    private Vector3 mastStartPos;
+    private Transform[] closestPallets = new Transform[1];
     private float lastDistanceToClosestPallet = float.MaxValue;
     private float[] lastActions = new float[4];
     private float[] currentActions = new float[4];
@@ -48,6 +51,7 @@ public class MLAgentController : Agent
     {
         startPos = transform.localPosition;
         forkStartPos = forkTransform.localPosition;
+        mastStartPos = mastTransform.localPosition;
     }
 
     private void Awake()
@@ -97,6 +101,7 @@ public class MLAgentController : Agent
         rb.angularVelocity = Vector3.zero;
         transform.localPosition = startPos;
         forkTransform.localPosition = forkStartPos;
+        mastTransform.localPosition = mastStartPos;
         transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         // transform.Rotate(0f, Random.Range(0f, 360f), 0f); // Optional für Variation
 

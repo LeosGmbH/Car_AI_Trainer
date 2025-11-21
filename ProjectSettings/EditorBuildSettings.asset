@@ -8,9 +8,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/01_Scenes/S_Testing.unity
     guid: 434b14025eac76c4e93f87295d3c8a78
-  - enabled: 1
+  - enabled: 0
     path: Assets/01_Scenes/S_Immitation_Training2.unity
     guid: ee8388037fa175748bc364aa2a5e22b9
+  - enabled: 1
+    path: Assets/01_Scenes/S_Training01.unity
+    guid: c5f3ffd4044d49f419f64c0a2539f0a3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

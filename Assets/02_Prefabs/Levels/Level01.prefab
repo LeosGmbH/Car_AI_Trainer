@@ -974,16 +974,14 @@ MonoBehaviour:
   m_CentreOfMassOffset: {x: 0, y: 0, z: 0}
   m_MaximumSteerAngle: 40
   m_SteerHelper: 0.644
-  m_TractionControl: 1
   m_FullTorqueOverAllWheels: 1400
   m_ReverseTorque: 300
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 30
+  m_BrakeTorque: 20000
   m_SpeedType: 1
   m_Topspeed: 40
   m_RevRangeBoundary: 1
-  m_SlipLimit: 0.3
-  m_BrakeTorque: 20000
 --- !u!114 &2864600368657835458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1044,12 +1042,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 7
+    VectorObservationSize: 10
     NumStackedVectorObservations: 5
     m_ActionSpec:
-      m_NumContinuousActions: 4
-      BranchSizes: 
-    VectorActionSize: 04000000
+      m_NumContinuousActions: 2
+      BranchSizes: 0300000002000000
+    VectorActionSize: 
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -1076,11 +1074,12 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 2500
+  MaxStep: 1200
   dropZoneManager: {fileID: 4784072900939493916}
   dropZoneTransform: {fileID: 1873655451701970109}
   palletParent: {fileID: 2162092926018287339}
   forkTransform: {fileID: 1260068238512764753}
+  mastTransform: {fileID: 4266149683521625345}
   enviromentController: {fileID: 6076696205528947933}
   moveActionRef: {fileID: 6555606499486350126, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   forkActionRef: {fileID: -511657924937048724, guid: 052faaac586de48259a63d0c4782560b, type: 3}
