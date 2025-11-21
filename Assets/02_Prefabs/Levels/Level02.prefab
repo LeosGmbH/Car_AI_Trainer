@@ -1175,7 +1175,7 @@ GameObject:
   - component: {fileID: 8770838807448027327}
   - component: {fileID: 2725210489374231172}
   m_Layer: 6
-  m_Name: Forklift
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

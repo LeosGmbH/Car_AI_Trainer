@@ -104,7 +104,7 @@ public class MLAgentController : Agent
 
         // 2. Aktionen ausführen
         playerMovement.SetInput(moveInput, rotateInput, forkInput, handbrakeInput);
-
+    
         // 3. Belohnungslogik anwenden (ausgelagert)
         ApplyRewardLogic(forkInput);
 
