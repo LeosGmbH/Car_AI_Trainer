@@ -19,6 +19,7 @@ public class MLAgentController : Agent
     public GameObject palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
     public Transform forkTransform; // Transform der Gabel-Plattform
     private MovementController playerMovement;
+    public CheckPalletCollider palletColliderChecker;
 
 
     // Limits für Normalisierung (müssen mit Ihrem Controller übereinstimmen)
@@ -26,15 +27,13 @@ public class MLAgentController : Agent
     public float maxY = 2.0f;
 
 
-    [Header("RL Settings")]
     public float distanceRewardFactor = 0.01f; // Dein "K" Faktor
 
 
     private SearchState currentSearchState;
-
-    private bool IsCarryingPallet = false;
+    [HideInInspector]
+    public bool IsCarryingPallet = false;
     private GameObject currentTargetPallet;
-    private float previousDistanceToTarget;
 
 
 
@@ -62,8 +61,6 @@ public class MLAgentController : Agent
         sensor.AddObservation(Mathf.Clamp(rb.linearVelocity.x / 8f, -1f, 1f));
         sensor.AddObservation(Mathf.Clamp(rb.linearVelocity.z / 8f, -1f, 1f));
         sensor.AddObservation(rb.linearVelocity.y);
-
-
 
 
         //new:
@@ -103,13 +100,6 @@ public class MLAgentController : Agent
 
         // --- Belohnungen ---
         AddReward(-0.001f); // Time Penalty
-
-        // Distanz-Belohnung
-        float currentDistance = Vector3.Distance(transform.position, GetCurrentTargetPosition());
-        float distanceChange = previousDistanceToTarget - currentDistance;
-        if (distanceChange > 0) AddReward(distanceChange * distanceRewardFactor);
-
-        previousDistanceToTarget = currentDistance;
 
 
     }
@@ -169,46 +159,14 @@ public class MLAgentController : Agent
 
 
         //new
-        IsCarryingPallet = false;
         currentSearchState = SearchState.Pallet;
         FindClosestPallet();
     }
 
 
+    
 
 
-
-
-
-    private void OnTriggerEnter(Collider other)
-    {
-        // Prüfen: Ist Gabel unten? (Toleranzbereich z.B. 0.1 Einheiten über Min)
-        bool isForkDown = forkTransform.localPosition.y <= (minY + 0.1f);
-
-        // AUFNAHME
-        if (other.CompareTag("Pallet") && !IsCarryingPallet && isForkDown)
-        {
-            IsCarryingPallet = true;
-
-            // Physik-Logik zum "Anheften" der Palette hier oder im Controller aufrufen:
-            //playerMovement.AttachPallet(other.gameObject);
-
-            AddReward(1.0f);
-            previousDistanceToTarget = Vector3.Distance(transform.position, dropZoneTransform.position);
-        }
-
-        // ABLAGE
-        else if (other.CompareTag("DropZone") && IsCarryingPallet)
-        {
-            IsCarryingPallet = false;
-
-            // Palette lösen/zerstören
-            // forkliftController.DetachAndDestroyPallet();
-
-            AddReward(5.0f);
-            FindClosestPallet();
-        }
-    }
 
     // Hilfsfunktionen
     private Vector3 GetCurrentTargetPosition()
@@ -218,7 +176,7 @@ public class MLAgentController : Agent
         return currentTargetPallet != null ? currentTargetPallet.transform.position : transform.position;
     }
 
-    private void FindClosestPallet()
+    public void FindClosestPallet()
     {
 
         List<GameObject> allPallets = new List<GameObject>();
@@ -236,8 +194,6 @@ public class MLAgentController : Agent
             if (d < minDst) { minDst = d; closest = p; }
         }
         currentTargetPallet = closest;
-        if (currentTargetPallet != null)
-            previousDistanceToTarget = Vector3.Distance(transform.position, currentTargetPallet.transform.position);
     }
 
 

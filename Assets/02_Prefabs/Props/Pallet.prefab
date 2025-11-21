@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5386173678188926978}
   m_Layer: 7
   m_Name: Pallet
-  m_TagString: Untagged
+  m_TagString: pallet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 6474770705175682791}
   m_Layer: 7
   m_Name: Pallet
-  m_TagString: Untagged
+  m_TagString: pallet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 4594738308394501944}
   m_Layer: 7
   m_Name: BoxCollider
-  m_TagString: Untagged
+  m_TagString: pallet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -219,6 +219,10 @@ PrefabInstance:
     - target: {fileID: 1000014240122608, guid: a4a7e963b130e7c41b17410f226fb86c, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000014240122608, guid: a4a7e963b130e7c41b17410f226fb86c, type: 3}
+      propertyPath: m_TagString
+      value: pallet
       objectReference: {fileID: 0}
     - target: {fileID: 4000014059315206, guid: a4a7e963b130e7c41b17410f226fb86c, type: 3}
       propertyPath: m_RootOrder
