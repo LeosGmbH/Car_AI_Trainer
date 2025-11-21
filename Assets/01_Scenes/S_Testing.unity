@@ -250,12 +250,69 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 5, y: 5, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1001 &715863017
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4489496832641437754, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_Name
+      value: Pallet
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 8.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -12.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8931993299500870755, guid: 76399c452a2614541bc6c2106e185581, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 76399c452a2614541bc6c2106e185581, type: 3}
 --- !u!1 &950271623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1723,7 +1780,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6304474325930185757}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de958ee16a804b146a134100e47aa7c9, type: 3}
   m_Name: 
@@ -2664,7 +2721,8 @@ MonoBehaviour:
   dropZoneTransform: {fileID: 599937407}
   palletParent: {fileID: 4752343406533802896}
   forkTransform: {fileID: 2719456789835016828}
-  palletColliderChecker: {fileID: 0}
+  moveActionRef: {fileID: 6555606499486350126, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  forkActionRef: {fileID: -511657924937048724, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   minY: 2.85
   maxY: -0.02
   distanceRewardFactor: 0.01
@@ -2682,18 +2740,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 8
+    VectorObservationSize: 10
     NumStackedVectorObservations: 5
     m_ActionSpec:
-      m_NumContinuousActions: 2
-      BranchSizes: 0200000002000000
-    VectorActionSize: 
+      m_NumContinuousActions: 3
+      BranchSizes: 
+    VectorActionSize: 03000000
     VectorActionDescriptions: []
-    VectorActionSpaceType: 0
+    VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 543407ac455e3d04ea6871e6eeae6f62, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: ForkLiftAgent
   TeamId: 0
   m_UseChildSensors: 1
@@ -3406,3 +3464,4 @@ SceneRoots:
   - {fileID: 1373176056}
   - {fileID: 7445167090662982540}
   - {fileID: 6919244498429891286}
+  - {fileID: 715863017}

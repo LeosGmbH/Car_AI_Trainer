@@ -5,6 +5,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MLAgentController : Agent
 {
@@ -19,8 +20,12 @@ public class MLAgentController : Agent
     public GameObject palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
     public Transform forkTransform; // Transform der Gabel-Plattform
     private MovementController playerMovement;
-    public CheckPalletCollider palletColliderChecker;
 
+    public InputActionReference moveActionRef;
+    public InputActionReference forkActionRef;
+
+    private InputAction moveAction;
+    private InputAction forkAction;
 
     // Limits für Normalisierung (müssen mit Ihrem Controller übereinstimmen)
     public float minY = 0.0f;
@@ -54,6 +59,8 @@ public class MLAgentController : Agent
         raySensors = GetComponents<RayPerceptionSensorComponent3D>(); // Holt ALLE Ray Perception Sensoren im GameObject
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
+        moveAction = moveActionRef.action;
+        forkAction = forkActionRef.action;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -67,7 +74,6 @@ public class MLAgentController : Agent
         // 1. Vektor zum Ziel (3)
         Vector3 targetPos = GetCurrentTargetPosition();
         sensor.AddObservation((targetPos - transform.position).normalized);
-        sensor.AddObservation((targetPos - transform.position).magnitude);
 
         // 2. Distanz zum Ziel (1)
         sensor.AddObservation(Vector3.Distance(transform.position, targetPos));
@@ -104,18 +110,28 @@ public class MLAgentController : Agent
 
     }
 
-    //public override void Heuristic(in ActionBuffers actionsOut)
-    //{
-    //    // Manuelle Steuerung für Testzwecke (Mapping auf Ihre Tasten)
-    //    var continuousActions = actionsOut.ContinuousActions;
-    //    continuousActions[0] = Input.GetAxis("Vertical");   // W/S
-    //    continuousActions[1] = Input.GetAxis("Horizontal"); // A/D
 
-    //    float fork = 0f;
-    //    if (Input.GetKey(KeyCode.UpArrow)) fork = 1f;
-    //    else if (Input.GetKey(KeyCode.DownArrow)) fork = -1f;
-    //    continuousActions[2] = fork;
-    //}
+
+
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var continuousActions = actionsOut.ContinuousActions;
+
+        // 1. Move Input (Horizontal/Vertical) - Liest Vektor2 (korrekt)
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+
+        // 2. Fork Input - Muss korrekt als float gelesen werden.
+        // Wenn 'forkAction' als 1D Axis Composite (Float) eingerichtet ist, ist dies KORREKT:
+        float forkInput = forkAction.ReadValue<float>();
+
+        // Zuweisung zu den ML-Agents ActionBuffers:
+        continuousActions[0] = moveInput.y; // Vertical (W/S)
+        continuousActions[1] = moveInput.x; // Horizontal (A/D)
+        continuousActions[2] = forkInput;    // Fork (Up/Down)
+    }
+
+
 
     public void AddAgentReward(float reward)
     {
