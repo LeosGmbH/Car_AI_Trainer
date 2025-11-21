@@ -18,6 +18,8 @@ namespace Assets.Skripts
         public float SteerInput { get; private set; }
         public float ForkInput { get; private set; }
 
+        public float HandbrakeInput { get; private set; }
+
         private void Awake()
         {
             carController = GetComponent<NewCarController>();
@@ -30,11 +32,12 @@ namespace Assets.Skripts
             ApplyForkInput();
         }
 
-        public void SetInput(float move, float steer, float fork)
+        public void SetInput(float move, float steer, float fork, float handbrake)
         {
             MoveInput = Mathf.Clamp(move, -1f, 1f);
             SteerInput = Mathf.Clamp(steer, -1f, 1f);
             ForkInput = Mathf.Clamp(fork, -1f, 1f);
+            HandbrakeInput = Mathf.Clamp(handbrake, 0f, 1f);
         }
 
         private void ApplyCarInput()
@@ -42,7 +45,19 @@ namespace Assets.Skripts
             float accel = Mathf.Max(0f, MoveInput);
             float footbrake = Mathf.Min(0f, MoveInput);
 
-            carController.Move(SteerInput, accel, footbrake, 0f);
+            carController.Move(SteerInput, accel, footbrake, HandbrakeInput);
+        }
+
+        public Dictionary<string, string> GetDebugInformations()
+        {
+            return new Dictionary<string, string>
+    {
+        { "Move Input", MoveInput.ToString("F2") },
+        { "Steer Input", SteerInput.ToString("F2") },
+        { "Fork Input", ForkInput.ToString("F2") },
+        { "Calc. Accel", Mathf.Max(0f, MoveInput).ToString("F2") },
+        { "Calc. Brake", Mathf.Abs(Mathf.Min(0f, MoveInput)).ToString("F2") }
+    };
         }
 
         private void ApplyForkInput()

@@ -48,10 +48,10 @@ mlagents-learn config\Configname.yaml --run-id=(name) --env="Builds\name.exe" --
 
 
 
-mlagents-learn config\DefaultManuell.yaml  --run-id=Test01 --force --env="Builds\Car_AI_Tainer.exe"
+mlagents-learn config\Default.yaml  --run-id=Test01 --force --env="Builds\Car_AI_Tainer.exe"
 
 
-
+mlagents-learn config\DefaultManuell.yaml  --run-id=Test01 --force
 
 
 

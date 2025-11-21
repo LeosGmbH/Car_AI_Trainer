@@ -21,11 +21,11 @@ public class MLAgentController : Agent
     public Transform forkTransform; // Transform der Gabel-Plattform
     private MovementController playerMovement;
 
+    [Header("Input")]
     public InputActionReference moveActionRef;
     public InputActionReference forkActionRef;
+    public InputActionReference handbrakeActionRef;
 
-    private InputAction moveAction;
-    private InputAction forkAction;
 
     // Limits für Normalisierung (müssen mit Ihrem Controller übereinstimmen)
     public float minY = 0.0f;
@@ -49,6 +49,28 @@ public class MLAgentController : Agent
     private Vector3 startPos;
     #endregion
 
+
+    public Dictionary<string, string> GetDebugInformations()
+    {
+        // Berechnung der Distanz nur wenn ein Ziel existiert
+        float distToTarget = (currentTargetPallet != null)
+            ? Vector3.Distance(transform.position, currentTargetPallet.transform.position)
+            : 0f;
+
+        return new Dictionary<string, string>
+    {
+        { "State", currentSearchState.ToString() },
+        { "Carrying Pallet", IsCarryingPallet.ToString() },
+        { "Current Target", currentTargetPallet != null ? currentTargetPallet.name : "None" },
+        { "Dist. to Target", distToTarget.ToString("F2") },
+        { "Cum. Reward", GetCumulativeReward().ToString("F4") },
+        { "Steps", $"{StepCount} / {MaxStep}" },
+        { "Velocity (m/s)", rb.linearVelocity.magnitude.ToString("F2") },
+        { "Fork Height", forkTransform.localPosition.y.ToString("F2") }
+    };
+    }
+
+
     void Start()
     {
         startPos = transform.localPosition;
@@ -59,8 +81,6 @@ public class MLAgentController : Agent
         raySensors = GetComponents<RayPerceptionSensorComponent3D>(); // Holt ALLE Ray Perception Sensoren im GameObject
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
-        moveAction = moveActionRef.action;
-        forkAction = forkActionRef.action;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -100,9 +120,10 @@ public class MLAgentController : Agent
         float moveInput = actions.ContinuousActions[0];   // -1 bis 1
         float rotateInput = actions.ContinuousActions[1]; // -1 bis 1
         float forkInput = actions.ContinuousActions[2];   // -1 bis 1
+        float handbrakeInput = actions.ContinuousActions[3];
 
         // Rufen Sie hier Ihre Methoden auf. Beispiel:
-        playerMovement.SetInput(moveInput, rotateInput, forkInput);
+        playerMovement.SetInput(moveInput, rotateInput, forkInput, handbrakeInput);
 
         // --- Belohnungen ---
         AddReward(-0.001f); // Time Penalty
@@ -119,16 +140,18 @@ public class MLAgentController : Agent
         var continuousActions = actionsOut.ContinuousActions;
 
         // 1. Move Input (Horizontal/Vertical) - Liest Vektor2 (korrekt)
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        Vector2 moveInput = moveActionRef.action.ReadValue<Vector2>();
 
         // 2. Fork Input - Muss korrekt als float gelesen werden.
         // Wenn 'forkAction' als 1D Axis Composite (Float) eingerichtet ist, ist dies KORREKT:
-        float forkInput = forkAction.ReadValue<float>();
+        float forkInput = forkActionRef.action.ReadValue<float>();
+        float handbrakeInput = handbrakeActionRef.action.ReadValue<float>();
 
         // Zuweisung zu den ML-Agents ActionBuffers:
         continuousActions[0] = moveInput.y; // Vertical (W/S)
         continuousActions[1] = moveInput.x; // Horizontal (A/D)
         continuousActions[2] = forkInput;    // Fork (Up/Down)
+        continuousActions[3] = handbrakeInput;
     }
 
 
