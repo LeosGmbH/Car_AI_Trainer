@@ -826,7 +826,7 @@ Transform:
   m_GameObject: {fileID: 1000011215988044}
   serializedVersion: 2
   m_LocalRotation: {x: 0.35798958, y: 0.4816777, z: -0.22460999, w: 0.7677112}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 94.61, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -947,7 +947,7 @@ Transform:
   m_GameObject: {fileID: 7954891973550418809}
   serializedVersion: 2
   m_LocalRotation: {x: 0.25340128, y: 0.00000012359125, z: -0.000000032374857, w: 0.9673613}
-  m_LocalPosition: {x: 0.06, y: 3.42, z: 3.14}
+  m_LocalPosition: {x: 0.06, y: 3.42, z: -3.62}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2650,9 +2650,9 @@ MonoBehaviour:
   m_SensorName: DropZoneRay
   m_DetectableTags:
   - dropZone
-  m_RaysPerDirection: 3
+  m_RaysPerDirection: 6
   m_MaxRayDegrees: 180
-  m_SphereCastRadius: 0.5
+  m_SphereCastRadius: 0.66
   m_RayLength: 60
   m_RayLayerMask:
     serializedVersion: 2
@@ -3026,7 +3026,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &7954891973550418809
 GameObject:
   m_ObjectHideFlags: 0
