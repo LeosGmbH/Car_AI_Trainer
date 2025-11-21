@@ -1,7 +1,29 @@
 {
+    "ForkLiftAgent": {
+        "checkpoints": [
+            {
+                "steps": 96000,
+                "file_path": "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.onnx",
+                "reward": null,
+                "creation_time": 1763739444.7900922,
+                "auxillary_file_paths": [
+                    "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 96000,
+            "file_path": "results\\Test01\\ForkLiftAgent.onnx",
+            "reward": null,
+            "creation_time": 1763739444.7900922,
+            "auxillary_file_paths": [
+                "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "1.1.0",
-        "torch_version": "2.6.0+cpu"
+        "torch_version": "2.5.1+cu121"
     }
 }
