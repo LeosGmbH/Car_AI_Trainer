@@ -229,7 +229,7 @@ Transform:
   m_GameObject: {fileID: 599937406}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.4, y: 0, z: 10.45}
+  m_LocalPosition: {x: 4.44, y: 2.41, z: -10.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -698,6 +698,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1609272956}
   - component: {fileID: 1609272957}
+  - component: {fileID: 1609272958}
   m_Layer: 6
   m_Name: PalletCollider
   m_TagString: Player
@@ -741,6 +742,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4961412, y: 0.99023974, z: 0.28766406}
   m_Center: {x: 0.0066249967, y: 0.68339664, z: -0.032797873}
+--- !u!114 &1609272958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1609272955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78b9c4625c7399241a8c57b42f842754, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CheckPalletCollider
+  mlAgentController: {fileID: 6619695123234130839}
 --- !u!1 &1929836157
 GameObject:
   m_ObjectHideFlags: 0
@@ -2650,9 +2664,11 @@ MonoBehaviour:
   dropZoneTransform: {fileID: 599937407}
   palletParent: {fileID: 4752343406533802896}
   forkTransform: {fileID: 2719456789835016828}
+  palletColliderChecker: {fileID: 0}
   minY: 2.85
   maxY: -0.02
   distanceRewardFactor: 0.01
+  IsCarryingPallet: 0
 --- !u!114 &6619695123234130840
 MonoBehaviour:
   m_ObjectHideFlags: 0
