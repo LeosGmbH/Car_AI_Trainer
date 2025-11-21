@@ -99,8 +99,12 @@ public class MLAgentController : Agent
         // 1. Aktionen extrahieren
         float moveInput = actions.ContinuousActions[0];
         float rotateInput = actions.ContinuousActions[1];
-        float forkInput = actions.ContinuousActions[2];
-        float handbrakeInput = actions.ContinuousActions[3];
+
+        int forkDecision = actions.DiscreteActions[0];
+        int handbrakeDecision = actions.DiscreteActions[1];
+
+        float forkInput = forkDecision == 1 ? 1f : forkDecision == 2 ? -1f : 0f;
+        float handbrakeInput = handbrakeDecision == 1 ? 1f : 0f;
 
         // 2. Aktionen ausführen
         playerMovement.SetInput(moveInput, rotateInput, forkInput, handbrakeInput);
@@ -124,7 +128,29 @@ public class MLAgentController : Agent
         }
     }
 
-    private void ApplyRewardLogic(float forkInput)
+    
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var continuousActions = actionsOut.ContinuousActions;
+
+        // 1. Move Input (Horizontal/Vertical) - Liest Vektor2 (korrekt)
+        Vector2 moveInput = moveActionRef.action.ReadValue<Vector2>();
+
+        // 2. Fork Input - Muss korrekt als float gelesen werden.
+        // Wenn 'forkAction' als 1D Axis Composite (Float) eingerichtet ist, ist dies KORREKT:
+        float forkInput = forkActionRef.action.ReadValue<float>();
+        float handbrakeInput = handbrakeActionRef.action.ReadValue<float>();
+
+        // Zuweisung zu den ML-Agents ActionBuffers:
+        continuousActions[0] = moveInput.y; // Vertical (W/S)
+        continuousActions[1] = moveInput.x; // Horizontal (A/D)
+        var discreteActions = actionsOut.DiscreteActions;
+        discreteActions[0] = forkInput > 0.5f ? 1 : forkInput < -0.5f ? 2 : 0;
+        discreteActions[1] = handbrakeInput > 0.5f ? 1 : 0;
+    }
+    
+private void ApplyRewardLogic(float forkInput)
     {
         // 1. Zeitstrafe (existentiell)
         AddReward(-0.001f);
@@ -153,26 +179,6 @@ public class MLAgentController : Agent
 
         lastFramePalletCount = currentCount; // Status für nächsten Frame speichern
     }
-
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-        var continuousActions = actionsOut.ContinuousActions;
-
-        // 1. Move Input (Horizontal/Vertical) - Liest Vektor2 (korrekt)
-        Vector2 moveInput = moveActionRef.action.ReadValue<Vector2>();
-
-        // 2. Fork Input - Muss korrekt als float gelesen werden.
-        // Wenn 'forkAction' als 1D Axis Composite (Float) eingerichtet ist, ist dies KORREKT:
-        float forkInput = forkActionRef.action.ReadValue<float>();
-        float handbrakeInput = handbrakeActionRef.action.ReadValue<float>();
-
-        // Zuweisung zu den ML-Agents ActionBuffers:
-        continuousActions[0] = moveInput.y; // Vertical (W/S)
-        continuousActions[1] = moveInput.x; // Horizontal (A/D)
-        continuousActions[2] = forkInput;    // Fork (Up/Down)
-        continuousActions[3] = handbrakeInput;
-    }
-
 
     public void Die()
     {
