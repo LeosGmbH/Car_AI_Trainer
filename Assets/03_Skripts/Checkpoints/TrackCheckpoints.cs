@@ -37,14 +37,12 @@ public class TrackCheckpoints : MonoBehaviour
             }
 
             float rewardPerCheckpoint = 50f / checkPointSingleList.Count;
-            parkourAgent.AddAgentReward(rewardPerCheckpoint);
             checkPointSingleList[nextCheckpointSingleIndex].gameObject.SetActive(true);
 
             // Prüfen, ob es das letzte Objekt ist
             if (currentIndex == checkPointSingleList.Count - 1)
             {
                 parkourAgent.ReachGoal();
-                parkourAgent.AddAgentReward(5f);
             }
         }
     }

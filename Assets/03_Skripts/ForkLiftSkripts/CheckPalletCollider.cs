@@ -2,26 +2,42 @@
 
 public class CheckPalletCollider : MonoBehaviour
 {
-    private bool isTouchingPallet = false;
-    public MLAgentController mlAgentController;
+    [SerializeField] private float carryingHeightThreshold = 0.3f;
+
+    public MLAgentController mlAgentController; // Im Inspector zuweisen!
+
+    private void Update()
+    {
+        // 1. Zustand: Wurde die Palette erfolgreich gehoben?
+        if (mlAgentController.IsPalletTouched)
+        {
+            // Setzt IsPalletLifted nur auf true, wenn berührt UND hoch genug
+            bool isForkHighEnough = mlAgentController.forkTransform.localPosition.y > carryingHeightThreshold;
+            mlAgentController.IsPalletLifted = isForkHighEnough;
+        }
+        else
+        {
+            // Wenn nicht berührt, kann auch nicht gehoben werden.
+            mlAgentController.IsPalletLifted = false;
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("pallet"))
+        // Setzt den Berührungsstatus
+        if (other.CompareTag("Pallet") || other.CompareTag("pallet"))
         {
-            mlAgentController.IsCarryingPallet = true;
+            mlAgentController.IsPalletTouched = true;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("pallet"))
+        // Berührungsstatus beendet
+        if (other.CompareTag("Pallet") || other.CompareTag("pallet"))
         {
-            mlAgentController.FindClosestPallet();
-            mlAgentController.IsCarryingPallet = false;
+            mlAgentController.IsPalletTouched = false;
         }
-
     }
 
-    
 }
