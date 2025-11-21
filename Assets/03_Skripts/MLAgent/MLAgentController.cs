@@ -15,6 +15,7 @@ public class MLAgentController : Agent
     public GameObject palletParent;  // Wo die Paletten im Hierarchiebaum liegen (zum Suchen)
     public Transform forkTransform; // Transform der Gabel-Plattform
     private MovementController playerMovement;
+    public EnviromentController enviromentController;
 
     [Header("Input")]
     public InputActionReference moveActionRef;
@@ -32,6 +33,9 @@ public class MLAgentController : Agent
     public bool IsPalletLifted = false;
     private Rigidbody rb;
     private Vector3 startPos;
+    private Vector3 forkStartPos;
+
+
     private int totalPalletsInScene;
     private int lastFramePalletCount = 0;
 
@@ -39,10 +43,12 @@ public class MLAgentController : Agent
     void Start()
     {
         startPos = transform.localPosition;
+        forkStartPos= forkTransform.localPosition;
     }
 
     private void Awake()
     {
+
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
         // Zähle alle Paletten zu Beginn
@@ -51,10 +57,13 @@ public class MLAgentController : Agent
 
     public override void OnEpisodeBegin()
     {
+        enviromentController.ResetObjectPositions();
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/EpisodesCount", 1, StatAggregationMethod.Sum);
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.localPosition = startPos;
+        forkTransform.localPosition = forkStartPos;
+        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
         // transform.Rotate(0f, Random.Range(0f, 360f), 0f); // Optional für Variation
 
         // NEU: DropZone leeren und Zähler zurücksetzen

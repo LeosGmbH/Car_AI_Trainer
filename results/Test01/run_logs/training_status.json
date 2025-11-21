@@ -2,22 +2,31 @@
     "ForkLiftAgent": {
         "checkpoints": [
             {
-                "steps": 96000,
-                "file_path": "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.onnx",
-                "reward": null,
-                "creation_time": 1763739444.7900922,
+                "steps": 499500,
+                "file_path": "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-499500.onnx",
+                "reward": -22.903398513793945,
+                "creation_time": 1763745037.685743,
                 "auxillary_file_paths": [
-                    "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.pt"
+                    "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-499500.pt"
+                ]
+            },
+            {
+                "steps": 675000,
+                "file_path": "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-675000.onnx",
+                "reward": null,
+                "creation_time": 1763745474.1073146,
+                "auxillary_file_paths": [
+                    "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-675000.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 96000,
+            "steps": 675000,
             "file_path": "results\\Test01\\ForkLiftAgent.onnx",
             "reward": null,
-            "creation_time": 1763739444.7900922,
+            "creation_time": 1763745474.1073146,
             "auxillary_file_paths": [
-                "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-96000.pt"
+                "results\\Test01\\ForkLiftAgent\\ForkLiftAgent-675000.pt"
             ]
         }
     },
