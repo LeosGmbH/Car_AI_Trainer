@@ -82,12 +82,14 @@ public class MLAgentRewardHandler
         {
             // ERFOLG: Eine NEUE Palette ist sicher in der Zone!
             agent.AddReward(1.0f);
+            Academy.Instance.StatsRecorder.Add("Events/PalletSecured", 1, StatAggregationMethod.Sum);
             Debug.Log("Palette secured!");
         }
         else if (currentCount < lastFramePalletCount)
         {
             // MISSERFOLG: Eine Palette ist aus der Zone gefallen!
             agent.AddReward(-1.0f);
+            Academy.Instance.StatsRecorder.Add("Events/PalletLost", 1, StatAggregationMethod.Sum);
             Debug.Log("Palette lost and must be re-collected!");
         }
 
@@ -106,7 +108,9 @@ public class MLAgentRewardHandler
             {
                 float distanceDelta = lastDistanceToClosestPallet - currentDistance;
                 // Increased multiplier from 0.05f to 0.1f
-                agent.AddReward(0.1f * distanceDelta);
+                float reward = 0.1f * distanceDelta;
+                agent.AddReward(reward);
+                Academy.Instance.StatsRecorder.Add("Reward/Distance", reward, StatAggregationMethod.Sum);
             }
             lastDistanceToClosestPallet = currentDistance;
         }
@@ -125,13 +129,17 @@ public class MLAgentRewardHandler
             // Penalty if fork UP
             if (forkNorm > 0)
             {
-                agent.AddReward(-0.005f * forkNorm);
+                float penalty = -0.005f * forkNorm;
+                agent.AddReward(penalty);
+                Academy.Instance.StatsRecorder.Add("Penalty/ForkUp", penalty, StatAggregationMethod.Sum);
             }
             
             // Penalty if Driving Backwards
             if (moveInput < 0)
             {
-                agent.AddReward(-0.005f * Mathf.Abs(moveInput));
+                float penalty = -0.005f * Mathf.Abs(moveInput);
+                agent.AddReward(penalty);
+                Academy.Instance.StatsRecorder.Add("Penalty/Backward", penalty, StatAggregationMethod.Sum);
             }
         }
         else // isPalletHeld
@@ -142,7 +150,9 @@ public class MLAgentRewardHandler
                 // Plan says: Penalty if forkNorm < 0.1 (Fork DOWN)
                 if (forkNorm < 0.1f)
                 {
-                    agent.AddReward(-0.005f * (1.0f - forkNorm));
+                    float penalty = -0.005f * (1.0f - forkNorm);
+                    agent.AddReward(penalty);
+                    Academy.Instance.StatsRecorder.Add("Penalty/ForkHeldDown", penalty, StatAggregationMethod.Sum);
                 }
             }
             else // isInDropZone
@@ -151,7 +161,9 @@ public class MLAgentRewardHandler
                 // Plan says: Penalty if forkNorm > 0.1 (Fork UP)
                 if (forkNorm > 0.1f)
                 {
-                    agent.AddReward(-0.005f * forkNorm);
+                    float penalty = -0.005f * forkNorm;
+                    agent.AddReward(penalty);
+                    Academy.Instance.StatsRecorder.Add("Penalty/ForkHeldUp", penalty, StatAggregationMethod.Sum);
                 }
             }
         }
@@ -159,7 +171,9 @@ public class MLAgentRewardHandler
         // General Fork Height Penalty
         if (forkTransform.localPosition.y > 0.4f)
         {
-             agent.AddReward(-0.005f * (forkTransform.localPosition.y - 0.4f));
+             float penalty = -0.005f * (forkTransform.localPosition.y - 0.4f);
+             agent.AddReward(penalty);
+             Academy.Instance.StatsRecorder.Add("Penalty/ForkHeightLimit", penalty, StatAggregationMethod.Sum);
         }
 
         if (rb.linearVelocity.magnitude < 0.1f)
@@ -176,13 +190,16 @@ public class MLAgentRewardHandler
                 jitterPenalty += Mathf.Abs(currentActions[i] - lastActions[i]);
             }
         }
-        agent.AddReward(-0.0005f * jitterPenalty);
+        float jitterReward = -0.0005f * jitterPenalty;
+        agent.AddReward(jitterReward);
+        Academy.Instance.StatsRecorder.Add("Penalty/Jitter", jitterReward, StatAggregationMethod.Sum);
 
         // Timeout Logic
         if (stepCount > maxStep * 0.5f)
         {
             if (!hasEverTouchedPallet)
             {
+                Academy.Instance.StatsRecorder.Add("Result/TimeoutDeath", 1, StatAggregationMethod.Sum);
                 Die();
             }
         }

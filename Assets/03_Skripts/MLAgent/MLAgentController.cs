@@ -171,6 +171,7 @@ public class MLAgentController : Agent
     {
         if (collision.gameObject.CompareTag("wall"))
         {
+            Academy.Instance.StatsRecorder.Add("Events/WallCollision", 1, StatAggregationMethod.Sum);
             rewardHandler.Die();
         }
     }
