@@ -1,26 +1,21 @@
 
-1. Start Venv: 
+venv\Scripts\activate
+tensorboard --logdir results
+
+
+1. start Venv : 
 venv\Scripts\activate
 
-
-
 2. Run Automatic training :
-
-
 python train_automation.py
-
 python new_automation.py
-
 
 3. View results with TensorBoard:
 tensorboard --logdir results
 
-
-
 4. start manual training:
 
 mlagents-learn config\configDatei.yaml  --run-id=(Name) --env="Builds\**.exe" 
-
 
 
 Extensions for 4 manual training command :
@@ -62,6 +57,9 @@ mlagents-learn config\Default_Imit.yaml  --run-id=Test_imi_01 --env="Builds\Car_
 
 mlagents-learn config\Default.yaml  --run-id=NewRewards01 --env="Builds\Level01\Car_AI_Tainer.exe" --force
 
+
+
+mlagents-learn config\Default.yaml  --run-id=NewRewards02 --env="Builds\Level01\Car_AI_Tainer.exe"
 
 
 
