@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &885138378
+--- !u!1001 &17892639
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -131,45 +131,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Level01
       objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_BehaviorType
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_BrainParameters.VectorActionSize.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: 'm_BrainParameters.VectorActionSize.Array.data[0]'
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_BrainParameters.m_ActionSpec.m_NumContinuousActions
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: 'm_BrainParameters.m_ActionSpec.BranchSizes.Array.data[0]'
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: 'm_BrainParameters.m_ActionSpec.BranchSizes.Array.data[1]'
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 5372126492723748299, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.563492
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5372126492723748299, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5372126492723748299, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.4367704
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5372126492723748299, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_LocalRotation.w
@@ -199,41 +171,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_Topspeed
-      value: 18
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_Downforce
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_SlipLimit
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_BrakeTorque
-      value: 3000
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_SteerHelper
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_ReverseTorque
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_MaximumSteerAngle
-      value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_MaxHandbrakeTorque
-      value: 10000
-      objectReference: {fileID: 0}
-    - target: {fileID: 8302104649522481477, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
-      propertyPath: m_FullTorqueOverAllWheels
-      value: 5000
+    - target: {fileID: 8382342711880927439, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
+      propertyPath: m_BehaviorType
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -375,8 +315,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7954891973550418809}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.25728405, y: -0.6647516, z: 0.263054, w: 0.65016365}
-  m_LocalPosition: {x: -2.6315079, y: 14.997681, z: 9.93234}
+  m_LocalRotation: {x: 0.31622142, y: -0.6351336, z: 0.31984186, w: 0.62794155}
+  m_LocalPosition: {x: 12.950485, y: 19.269411, z: 6.3192716}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -532,4 +472,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 4000014124687784}
   - {fileID: 558169424553028955}
-  - {fileID: 885138378}
+  - {fileID: 17892639}
