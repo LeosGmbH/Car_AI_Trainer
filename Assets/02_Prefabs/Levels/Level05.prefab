@@ -978,6 +978,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 6143248644906246457, guid: 14d8093bc444b9d47928d6551c788488, type: 3}
+      propertyPath: levelName
+      value: Level05
+      objectReference: {fileID: 0}
+    - target: {fileID: 6143248644906246457, guid: 14d8093bc444b9d47928d6551c788488, type: 3}
       propertyPath: palletParent
       value: 
       objectReference: {fileID: 1086353802970894659}

@@ -1,8 +1,11 @@
+from math import fabs
 from ruamel.yaml import YAML
 import subprocess
 import os
 import time
 import datetime
+import signal
+import sys
 
 yaml = YAML()
 
@@ -152,8 +155,16 @@ def main():
         based_on = False
         
 
+def signal_handler(sig, frame):
+    print("\n\nTraining wurde durch Benutzer unterbrochen. Speichere aktuelle Konfiguration...")
+    sys.exit(0)
+
 if __name__ == "__main__":
-    main()
+    signal.signal(signal.SIGINT, signal_handler)
+    try:
+        main()
+    except KeyboardInterrupt:
+        signal_handler(None, None)
 
 
 
