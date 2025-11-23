@@ -239,6 +239,7 @@ public class MLAgentRewardHandler
     {
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 0, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add("WinDeathRatio/SurvivedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/DiedCount", 1, StatAggregationMethod.Sum);
         agent.AddReward(-20f);
         agent.EndEpisode();
@@ -252,7 +253,7 @@ public class MLAgentRewardHandler
         agent.AddReward(timeBonus);
         agent.AddReward(10f);
 
-
+        Academy.Instance.StatsRecorder.Add("WinDeathRatio/DiedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/SurvivedCount", 1, StatAggregationMethod.Sum);
