@@ -60,3 +60,8 @@ mlagents-learn config\Default_Imit.yaml  --run-id=Test_imi_01 --env="Builds\Car_
 
 
 
+mlagents-learn config\Default.yaml  --run-id=NewRewards01 --env="Builds\Level01\Car_AI_Tainer.exe" --force
+
+
+
+
