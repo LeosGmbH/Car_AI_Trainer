@@ -12,6 +12,7 @@ public class MLAgentRewardHandler
     private MLAgentPerceptionHelper perceptionHelper;
 
     private float lastDistanceToClosestPallet = float.MaxValue;
+    private float lastDistanceToDropZone = float.MaxValue;
     private int lastFramePalletCount = 0;
     
     // Limits matching the controller
@@ -39,6 +40,7 @@ public class MLAgentRewardHandler
     {
         lastFramePalletCount = 0;
         lastDistanceToClosestPallet = float.MaxValue;
+        lastDistanceToDropZone = float.MaxValue;
         
         for (int i = 0; i < lastActions.Length; i++) lastActions[i] = 0f;
         for (int i = 0; i < currentActions.Length; i++) currentActions[i] = 0f;
@@ -100,27 +102,55 @@ public class MLAgentRewardHandler
             agent.AddReward(0.003f);
         }
 
-        Transform closestPallet = perceptionHelper.ClosestPallets[0];
-        if (closestPallet != agent.transform)
+        bool isPalletHeld = agent.IsPalletLifted;
+
+        if (isPalletHeld)
         {
-            float currentDistance = Vector3.Distance(agent.transform.position, closestPallet.position);
-            if (lastDistanceToClosestPallet != float.MaxValue)
+            // --- LOGIK: ZUR DROPZONE FAHREN ---
+            // Wenn wir eine Palette haben, wollen wir zur DropZone!
+            float currentDistanceToDropZone = Vector3.Distance(agent.transform.position, agent.dropZoneTransform.position);
+            
+            if (lastDistanceToDropZone != float.MaxValue)
             {
-                float distanceDelta = lastDistanceToClosestPallet - currentDistance;
-                // Increased multiplier from 0.05f to 0.1f
-                float reward = 0.1f * distanceDelta;
+                float distanceDelta = lastDistanceToDropZone - currentDistanceToDropZone;
+                // Höherer Multiplikator, damit der Agent den Weg zur Zone priorisiert
+                float reward = 0.5f * distanceDelta; 
                 agent.AddReward(reward);
-                Academy.Instance.StatsRecorder.Add("Reward/Distance", reward, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Reward/DistanceToDropZone", reward, StatAggregationMethod.Sum);
             }
-            lastDistanceToClosestPallet = currentDistance;
+            lastDistanceToDropZone = currentDistanceToDropZone;
+            
+            // Reset Pallet Distance, damit wir beim Ablegen nicht springen
+            lastDistanceToClosestPallet = float.MaxValue;
         }
         else
         {
-            lastDistanceToClosestPallet = float.MaxValue;
+            // --- LOGIK: ZUR PALETTE FAHREN ---
+            // Wenn wir KEINE Palette haben, suchen wir die nächste!
+            Transform closestPallet = perceptionHelper.ClosestPallets[0];
+            if (closestPallet != agent.transform)
+            {
+                float currentDistance = Vector3.Distance(agent.transform.position, closestPallet.position);
+                if (lastDistanceToClosestPallet != float.MaxValue)
+                {
+                    float distanceDelta = lastDistanceToClosestPallet - currentDistance;
+                    float reward = 0.1f * distanceDelta;
+                    agent.AddReward(reward);
+                    Academy.Instance.StatsRecorder.Add("Reward/DistanceToPallet", reward, StatAggregationMethod.Sum);
+                }
+                lastDistanceToClosestPallet = currentDistance;
+            }
+            else
+            {
+                lastDistanceToClosestPallet = float.MaxValue;
+            }
+
+            // Reset DropZone Distance
+            lastDistanceToDropZone = float.MaxValue;
         }
 
         float forkNorm = Mathf.Clamp01((forkTransform.localPosition.y - minY) / (maxY - minY));
-        bool isPalletHeld = agent.IsPalletLifted;
+        // bool isPalletHeld = agent.IsPalletLifted; // Bereits oben definiert
         bool isInDropZone = dropZoneManager.IsAgentInDropZone(agent.transform.position);
         float moveInput = currentActions[0];
 
@@ -207,6 +237,8 @@ public class MLAgentRewardHandler
 
     public void Die()
     {
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 1, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/DiedCount", 1, StatAggregationMethod.Sum);
         agent.AddReward(-20f);
         agent.EndEpisode();
@@ -220,6 +252,9 @@ public class MLAgentRewardHandler
         agent.AddReward(timeBonus);
         agent.AddReward(10f);
 
+
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 1, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/SurvivedCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("Agent/timeBonus", timeBonus, StatAggregationMethod.Average);
         Academy.Instance.StatsRecorder.Add("Agent/winReward", agent.GetCumulativeReward(), StatAggregationMethod.Average);

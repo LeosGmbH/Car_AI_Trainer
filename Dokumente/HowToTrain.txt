@@ -7,8 +7,8 @@ tensorboard --logdir results
 venv\Scripts\activate
 
 2. Run Automatic training :
-python train_automation.py
-python new_automation.py
+python train_automation.py //falscher pfad
+
 
 3. View results with TensorBoard:
 tensorboard --logdir results

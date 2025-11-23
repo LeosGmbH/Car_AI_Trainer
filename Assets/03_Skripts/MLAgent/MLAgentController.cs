@@ -8,6 +8,8 @@ using UnityEngine.InputSystem;
 
 public class MLAgentController : Agent
 {
+    [Header("Settings")]
+    [SerializeField] public string levelName;
 
     [Header("Referenzen")]
     public DropZoneManager dropZoneManager;
@@ -32,6 +34,7 @@ public class MLAgentController : Agent
 
     [HideInInspector]
     public bool IsPalletTouched = false;
+    [HideInInspector]
     public bool IsPalletLifted = false;
     private Rigidbody rb;
     private Vector3 startPos;
@@ -43,7 +46,7 @@ public class MLAgentController : Agent
     // Helper classes
     private MLAgentPerceptionHelper perceptionHelper;
     private MLAgentRewardHandler rewardHandler;
-
+    
 
     void Start()
     {
@@ -68,6 +71,7 @@ public class MLAgentController : Agent
     public override void OnEpisodeBegin()
     {
         enviromentController.ResetObjectPositions();
+        Academy.Instance.StatsRecorder.Add($"Lvls/{levelName}/EpisodesCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/EpisodesCount", 1, StatAggregationMethod.Sum);
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -75,7 +79,7 @@ public class MLAgentController : Agent
         forkTransform.localPosition = forkStartPos;
         mastTransform.localPosition = mastStartPos;
         transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-        // transform.Rotate(0f, Random.Range(0f, 360f), 0f); // Optional für Variation
+        // transform.Rotate(0f, Random.Range(0f, 360f), 0f); // Optional für Variation.
 
         // NEU: DropZone leeren und Zähler zurücksetzen
         if (dropZoneManager != null) dropZoneManager.palletsInZone.Clear();

@@ -7,20 +7,20 @@ import datetime
 yaml = YAML()
 
 
-WORK_DIR = r"C:\LEO\SEB\SEB8\BachelorArbeit\ParkourMLAgent"
-ENV_PATH = r'Builds\NewV3AllLevelDrcOcNormalx2\ParkourMLAgent.exe'
-RUN_ID = "Skript_Showcase"
+WORK_DIR = r"E:\LEO_X9\Projekte\Unity\Car_AI_Trainer"
+ENV_PATH = r"Builds\Level01_02_05\Car_AI_Tainer.exe"
+RUN_ID = "AT_01_02_05_LVL_V01"
 BASED_ON_ID = "" 
 
-MAX_TOTAL_STEPS = 1_000_000_000
+MAX_TOTAL_STEPS = 30_000_000
 STEP_INCREMENT = 1_000_000
 LR_INCREMENT = 0.0001  
-LOG_DIR = os.path.join(WORK_DIR, r"config\Automation\ConfigLog")
-LOG_FILE_PATH = os.path.join(LOG_DIR, RUN_ID + "Log.txt")
+LOG_DIR = os.path.join(WORK_DIR, r"Automation\Logs")
+LOG_FILE_PATH = os.path.join(LOG_DIR, RUN_ID + "_Log.txt")
 
-CONFIG_FILE_DEFAULT = os.path.join(WORK_DIR, r"config\Automation\Default.yaml")
-CONFIG_DIR = os.path.join(WORK_DIR, r"config\Automation")
-CONFIG_FILE = os.path.join(CONFIG_DIR, RUN_ID + "config.yaml")
+CONFIG_FILE_DEFAULT = os.path.join(WORK_DIR, r"Automation\config\Default.yaml")
+CONFIG_DIR = os.path.join(WORK_DIR, r"Automation\config\Automation_Configs")
+CONFIG_FILE = os.path.join(CONFIG_DIR, RUN_ID + "_config.yaml")
 
 
 if not os.path.exists(CONFIG_FILE):
@@ -160,7 +160,6 @@ if __name__ == "__main__":
 #  venv\Scripts\activate
 
 #  tensorboard --logdir results
-#  python new_automation.py
-#  python Training_Automation.py
+#  python Automation\Training_Automation.py
 
 

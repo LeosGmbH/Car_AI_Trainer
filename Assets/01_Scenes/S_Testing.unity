@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6844060509274615306, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
+      propertyPath: DecisionPeriod
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 8382342711880927439, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_BehaviorType
       value: 1
