@@ -62,4 +62,6 @@ mlagents-learn config\Default.yaml  --run-id=NewRewards01 --env="Builds\Level01\
 mlagents-learn config\Default.yaml  --run-id=NewRewards02 --env="Builds\Level01\Car_AI_Tainer.exe"
 
 
+mlagents-learn config\Default.yaml  --run-id=NewRewards02 --env="Builds\Level01_02_05\Car_AI_Tainer.exe"
+
 

@@ -6,3 +6,17 @@
 
 [2025-11-23 18:40:44] Neues Training mit max_steps=1000000, learning_rate=0.0005, beta=0.08, epsilon=0.2
 
+[2025-11-23 18:52:44] Neues Training mit max_steps=2000000, learning_rate=0.00058, beta=0.0824, epsilon=0.203
+
+[2025-11-23 19:04:44] Neues Training mit max_steps=3000000, learning_rate=0.00066, beta=0.0848, epsilon=0.206
+
+[2025-11-23 19:16:44] Neues Training mit max_steps=4000000, learning_rate=0.00072, beta=0.0864, epsilon=0.208
+
+[2025-11-23 19:28:44] Neues Training mit max_steps=5000000, learning_rate=0.00078, beta=0.088, epsilon=0.21
+
+[2025-11-23 19:40:44] Neues Training mit max_steps=6000000, learning_rate=0.00082, beta=0.0888, epsilon=0.211
+
+[2025-11-23 19:52:45] Neues Training mit max_steps=7000000, learning_rate=0.00086, beta=0.0896, epsilon=0.212
+
+[2025-11-23 20:04:45] Neues Training mit max_steps=8000000, learning_rate=0.00088, beta=0.09032, epsilon=0.2129
+
