@@ -81,6 +81,7 @@ public class MLAgentController : Agent
         if (dropZoneManager != null) dropZoneManager.palletsInZone.Clear();
         
         rewardHandler.Reset();
+        rewardHandler.hasEverTouchedPallet = false;
         perceptionHelper.FindClosestPallets();
     }
 
@@ -145,7 +146,11 @@ public class MLAgentController : Agent
         rewardHandler.UpdateActions(actions.ContinuousActions);
 
         // 3. Belohnungslogik anwenden (ausgelagert)
-        rewardHandler.ApplyRewardLogic(forkInput);
+        if (IsPalletTouched)
+        {
+            rewardHandler.hasEverTouchedPallet = true;
+        }
+        rewardHandler.ApplyRewardLogic(forkInput, StepCount, MaxStep);
 
         // 4. Episoden-Ende prüfen
         if (dropZoneManager.IsComplete(totalPalletsInScene))
@@ -162,7 +167,13 @@ public class MLAgentController : Agent
         rewardHandler.SaveLastActions(actions.ContinuousActions);
     }
 
-
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("wall"))
+        {
+            rewardHandler.Die();
+        }
+    }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {

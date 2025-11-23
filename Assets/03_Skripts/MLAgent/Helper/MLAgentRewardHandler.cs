@@ -18,6 +18,8 @@ public class MLAgentRewardHandler
     private float minY;
     private float maxY;
 
+    public bool hasEverTouchedPallet = false;
+
     // Action tracking for jitter penalty
     private float[] lastActions = new float[4];
     private float[] currentActions = new float[4];
@@ -68,7 +70,7 @@ public class MLAgentRewardHandler
         }
     }
 
-    public void ApplyRewardLogic(float forkInput)
+    public void ApplyRewardLogic(float forkInput, int stepCount, int maxStep)
     {
         // 1. Zeitstrafe (existentiell)
         agent.AddReward(-0.001f);
@@ -103,7 +105,8 @@ public class MLAgentRewardHandler
             if (lastDistanceToClosestPallet != float.MaxValue)
             {
                 float distanceDelta = lastDistanceToClosestPallet - currentDistance;
-                agent.AddReward(0.05f * distanceDelta);
+                // Increased multiplier from 0.05f to 0.1f
+                agent.AddReward(0.1f * distanceDelta);
             }
             lastDistanceToClosestPallet = currentDistance;
         }
@@ -115,21 +118,48 @@ public class MLAgentRewardHandler
         float forkNorm = Mathf.Clamp01((forkTransform.localPosition.y - minY) / (maxY - minY));
         bool isPalletHeld = agent.IsPalletLifted;
         bool isInDropZone = dropZoneManager.IsAgentInDropZone(agent.transform.position);
+        float moveInput = currentActions[0];
 
         if (!isPalletHeld)
         {
-            agent.AddReward(0.005f * (1.0f - forkNorm));
-            agent.AddReward(-0.005f * forkNorm);
+            // Penalty if fork UP
+            if (forkNorm > 0)
+            {
+                agent.AddReward(-0.005f * forkNorm);
+            }
+            
+            // Penalty if Driving Backwards
+            if (moveInput < 0)
+            {
+                agent.AddReward(-0.005f * Mathf.Abs(moveInput));
+            }
         }
-        else if (!isInDropZone)
+        else // isPalletHeld
         {
-            agent.AddReward(0.005f * forkNorm);
-            agent.AddReward(-0.005f * (1.0f - forkNorm));
+            if (!isInDropZone)
+            {
+                // Penalty if Fork DOWN (we want to carry it high enough? Or just not on floor?)
+                // Plan says: Penalty if forkNorm < 0.1 (Fork DOWN)
+                if (forkNorm < 0.1f)
+                {
+                    agent.AddReward(-0.005f * (1.0f - forkNorm));
+                }
+            }
+            else // isInDropZone
+            {
+                // Penalty if Fork UP (assuming we want to drop it)
+                // Plan says: Penalty if forkNorm > 0.1 (Fork UP)
+                if (forkNorm > 0.1f)
+                {
+                    agent.AddReward(-0.005f * forkNorm);
+                }
+            }
         }
-        else
+
+        // General Fork Height Penalty
+        if (forkTransform.localPosition.y > 0.4f)
         {
-            agent.AddReward(0.005f * (1.0f - forkNorm));
-            agent.AddReward(-0.005f * forkNorm);
+             agent.AddReward(-0.005f * (forkTransform.localPosition.y - 0.4f));
         }
 
         if (rb.linearVelocity.magnitude < 0.1f)
@@ -147,6 +177,15 @@ public class MLAgentRewardHandler
             }
         }
         agent.AddReward(-0.0005f * jitterPenalty);
+
+        // Timeout Logic
+        if (stepCount > maxStep * 0.5f)
+        {
+            if (!hasEverTouchedPallet)
+            {
+                Die();
+            }
+        }
     }
 
     public void Die()

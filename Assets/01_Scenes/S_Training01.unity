@@ -1933,6 +1933,10 @@ PrefabInstance:
       propertyPath: m_Model
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 5319e5bd02a61e64999295c6b73e7b83, type: 3}
+    - target: {fileID: 2115505296350132625, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
+      propertyPath: m_BehaviorType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5372126492723748299, guid: 2753c5b33653a2542a27a879d2904f89, type: 3}
       propertyPath: m_LocalPosition.x
       value: 31.2873
