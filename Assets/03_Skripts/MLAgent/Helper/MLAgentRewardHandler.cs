@@ -212,7 +212,8 @@ public class MLAgentRewardHandler
             // --- Phase 1: Search ---
             
             // Annäherung an nächste Palette
-            Transform closestPallet = perceptionHelper.ClosestPallets.Length > 0 ? perceptionHelper.ClosestPallets[0] : null;
+            // Annäherung an nächste Palette
+            Transform closestPallet = perceptionHelper.TargetPallet;
             if (closestPallet != null && closestPallet != agent.transform)
             {
                 // Distance tracking handled in HandleDistanceRewards
@@ -391,7 +392,7 @@ public class MLAgentRewardHandler
         // Phase 1: Approach Pallet
         if (!isTouched && !isLifted)
         {
-            Transform closest = perceptionHelper.ClosestPallets.Length > 0 ? perceptionHelper.ClosestPallets[0] : null;
+            Transform closest = perceptionHelper.TargetPallet;
             if (closest != null && closest != agent.transform)
             {
                 float dist = Vector3.Distance(agent.transform.position, closest.position);

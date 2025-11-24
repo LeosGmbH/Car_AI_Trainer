@@ -8,7 +8,7 @@ public class MLAgentPerceptionHelper
     private GameObject palletParent;
     private DropZoneManager dropZoneManager;
 
-    public Transform[] ClosestPallets { get; private set; } = new Transform[5];
+    public Transform TargetPallet { get; private set; }
 
     public MLAgentPerceptionHelper(Transform agentTransform, GameObject palletParent, DropZoneManager dropZoneManager)
     {
@@ -19,31 +19,24 @@ public class MLAgentPerceptionHelper
 
     public void FindClosestPallets()
     {
-        // Reset array
-        for (int i = 0; i < ClosestPallets.Length; i++)
-        {
-            ClosestPallets[i] = agentTransform;
-        }
+        TargetPallet = null;
+        float closestDistSqr = float.MaxValue;
 
-        List<Transform> unsecuredPallets = new List<Transform>();
         int childCount = palletParent.transform.childCount;
         for (int i = 0; i < childCount; i++)
         {
             Transform child = palletParent.transform.GetChild(i);
-            if (!dropZoneManager.palletsInZone.Contains(child.gameObject))
+            
+            // Ignore pallets already in the drop zone
+            if (dropZoneManager.palletsInZone.Contains(child.gameObject))
+                continue;
+
+            float distSqr = (child.position - agentTransform.position).sqrMagnitude;
+            if (distSqr < closestDistSqr)
             {
-                unsecuredPallets.Add(child);
+                closestDistSqr = distSqr;
+                TargetPallet = child;
             }
-        }
-
-        unsecuredPallets.Sort((a, b) =>
-            ((a.position - agentTransform.position).sqrMagnitude)
-                .CompareTo((b.position - agentTransform.position).sqrMagnitude));
-
-        int limit = Mathf.Min(ClosestPallets.Length, unsecuredPallets.Count);
-        for (int i = 0; i < limit; i++)
-        {
-            ClosestPallets[i] = unsecuredPallets[i];
         }
     }
 

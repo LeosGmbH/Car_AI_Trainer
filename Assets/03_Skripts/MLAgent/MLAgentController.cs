@@ -93,7 +93,7 @@ public class MLAgentController : Agent
     {
         perceptionHelper.FindClosestPallets();
 
-        // Vector Observation Size: 6 Floats
+        // Vector Observation Size: 10 Floats
 
         // 1. Eigene Geschwindigkeit (2) - Nur XZ-Ebene, normalisiert
         sensor.AddObservation(Mathf.Clamp(rb.linearVelocity.x / 8f, -1f, 1f));
@@ -111,23 +111,20 @@ public class MLAgentController : Agent
         // 4. Steuerung (1)
         sensor.AddObservation(rb.angularVelocity.y / 10f); // Normalisierte Drehgeschwindigkeit
 
-        Transform[] closestPallets = perceptionHelper.ClosestPallets;
-        for (int i = 0; i < closestPallets.Length; i++)
+        // 5. Target Pallet (3)
+        Transform targetPallet = perceptionHelper.TargetPallet;
+        if (targetPallet != null)
         {
-            Transform pallet = closestPallets[i];
-            if (pallet == transform)
-            {
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
-                sensor.AddObservation(0f);
-            }
-            else
-            {
-                Vector3 relative = pallet.position - transform.position;
-                sensor.AddObservation(Mathf.Clamp(relative.x / 10f, -1f, 1f));
-                sensor.AddObservation(Mathf.Clamp(relative.z / 10f, -1f, 1f));
-                sensor.AddObservation(1f);
-            }
+            Vector3 relative = targetPallet.position - transform.position;
+            sensor.AddObservation(Mathf.Clamp(relative.x / 10f, -1f, 1f));
+            sensor.AddObservation(Mathf.Clamp(relative.z / 10f, -1f, 1f));
+            sensor.AddObservation(1f); // Target exists
+        }
+        else
+        {
+            sensor.AddObservation(0f);
+            sensor.AddObservation(0f);
+            sensor.AddObservation(0f); // Target does not exist
         }
     }
 
@@ -224,6 +221,10 @@ public class MLAgentController : Agent
         float minY = 0.0f;
         float maxY = 2.0f;
         float forkNorm = (forkTransform.localPosition.y - minY) / (maxY - minY);
+        
+        Transform target = perceptionHelper.TargetPallet;
+        string targetName = target != null ? target.name : "None";
+        string targetDist = target != null ? Vector3.Distance(transform.position, target.position).ToString("F2") : "-";
 
         return new Dictionary<string, string>
         {
@@ -246,6 +247,11 @@ public class MLAgentController : Agent
             { "Gabel Höhe (Norm)", Mathf.Clamp(forkNorm, 0f, 1f).ToString("F2") },
             { "Pal. Berührt (IsPalletTouched)", IsPalletTouched.ToString() },
             { "Pal. Angehoben (IsPalletLifted)", IsPalletLifted.ToString() },
+            
+            // --- TARGET PALLET ---
+            { "--- TARGET ---", "" },
+            { "Target Pallet", targetName },
+            { "Distance", targetDist },
 
             // --- BELOHNUNG (OBSERVATION ZUM FORTSCHRITT) ---
             { "--- FORTSCHRITT ---", "" },
