@@ -11,12 +11,18 @@ public class FitnessTracker : MonoBehaviour, IEvolutionAgent
     [Header("Debug")]
     [SerializeField] private float currentFitness = 0f;
     [SerializeField] private bool isAlive = true;
+    public bool IsDone { get; private set; } = false;
 
     private MaterialPropertyBlock propBlock;
+    private Rigidbody rb;
+    private Collider[] colliders;
 
     private void Awake()
     {
         propBlock = new MaterialPropertyBlock();
+        rb = GetComponent<Rigidbody>();
+        colliders = GetComponentsInChildren<Collider>();
+
         if (renderersToColor == null || renderersToColor.Length == 0)
         {
             renderersToColor = GetComponentsInChildren<Renderer>();
@@ -25,7 +31,7 @@ public class FitnessTracker : MonoBehaviour, IEvolutionAgent
 
     public void AddFitness(float amount)
     {
-        if (!isAlive) return;
+        if (!isAlive || IsDone) return;
         currentFitness += amount;
     }
 
@@ -40,21 +46,54 @@ public class FitnessTracker : MonoBehaviour, IEvolutionAgent
     {
         currentFitness = 0f;
         isAlive = true;
+        IsDone = false;
         SetColor(normalColor);
+        
+        // Re-enable physics/visuals
+        SetVisualsAndPhysics(true);
         gameObject.SetActive(true);
+    }
+
+    public void MarkAsDone()
+    {
+        if (IsDone) return;
+        IsDone = true;
+        
+        // Notify Manager
+        var manager = FindFirstObjectByType<EvolutionManager>();
+        if (manager != null) manager.NotifyAgentDone(this);
+
+        // Disable physics/visuals to "hide" agent until next gen
+        SetVisualsAndPhysics(false);
+    }
+
+    private void SetVisualsAndPhysics(bool state)
+    {
+        // Visuals
+        foreach (var r in renderersToColor) r.enabled = state;
+        
+        // Physics
+        if (rb != null)
+        {
+            if (!state && !rb.isKinematic) 
+            {
+                rb.linearVelocity = Vector3.zero;
+            }
+            rb.isKinematic = !state;
+        }
+        
+        // Colliders - but NOT WheelColliders (they are needed by NewCarController)
+        foreach (var c in colliders)
+        {
+            if (c is WheelCollider) continue; // Skip WheelColliders
+            c.enabled = state;
+        }
     }
 
     public void Die()
     {
         isAlive = false;
         SetColor(deadColor);
-        // Optional: Disable GameObject or just mark as dead
-        // gameObject.SetActive(false); 
-        // For now, we keep them active but visually "dead" so they don't interfere physically if we wanted, 
-        // but usually we want to stop them. Let's rely on the Agent to handle "EndEpisode" or similar if needed.
-        // But for pure evolution logic, "Die" might just mean "Excluded from next gen selection".
-        // If we want them to stop moving, the Agent script needs to know.
-        // For this implementation, we'll just visualy mark them. The EvolutionManager might reset positions anyway.
     }
 
     public void OnSurvive()

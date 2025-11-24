@@ -22,26 +22,26 @@ TagManager:
   - DropZone
   - wall
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Agent_1
+  - Agent_2
+  - Agent_3
+  - Agent_4
+  - Agent_5
+  - Agent_6
+  - Agent_7
+  - Agent_8
+  - Agent_9
+  - Agent_10
+  - Agent_11
+  - Agent_12
+  - Agent_13
+  - Agent_14
+  - Agent_15
+  - Agent_16
+  - Agent_17
+  - Agent_18
+  - Agent_19
+  - Agent_20
   m_SortingLayers:
   - name: Default
     uniqueID: 0

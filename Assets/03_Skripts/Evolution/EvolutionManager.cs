@@ -6,8 +6,12 @@ using Unity.MLAgents;
 
 public class EvolutionManager : MonoBehaviour
 {
+    public enum GenerationMode { TimeBased, Survival }
+
     [Header("Settings")]
-    [Tooltip("Duration of one generation in seconds")]
+    public GenerationMode generationMode = GenerationMode.TimeBased;
+
+    [Tooltip("Duration of one generation in seconds (Only for TimeBased)")]
     public float generationDuration = 30f;
     
     [Tooltip("Percentage of top agents to keep (0.0 to 1.0)")]
@@ -24,6 +28,7 @@ public class EvolutionManager : MonoBehaviour
     private float timer;
     private int generationCount = 1;
     private List<IEvolutionAgent> agents = new List<IEvolutionAgent>();
+    private HashSet<IEvolutionAgent> activeAgents = new HashSet<IEvolutionAgent>();
     
     // Stats
     private float bestFitness;
@@ -33,31 +38,57 @@ public class EvolutionManager : MonoBehaviour
 
     private void Start()
     {
-        // Find all agents
-        // Note: This finds components implementing the interface.
-        // If agents are instantiated at runtime, this needs to be called again or agents need to register themselves.
         FindAgents();
         StartGeneration();
     }
 
     private void Update()
     {
-        timer += Time.deltaTime;
-
-        if (timer >= generationDuration)
+        if (generationMode == GenerationMode.TimeBased)
         {
-            EndGeneration();
+            timer += Time.deltaTime;
+            if (timer >= generationDuration)
+            {
+                EndGeneration();
+            }
+        }
+        else if (generationMode == GenerationMode.Survival)
+        {
+            timer += Time.deltaTime;
+            // Failsafe: If generation takes too long (e.g. 5 minutes), force end
+            if (timer > 300f) 
+            {
+                EndGeneration();
+            }
+        }
+    }
+
+    public void NotifyAgentDone(IEvolutionAgent agent)
+    {
+        if (generationMode != GenerationMode.Survival) return;
+
+        if (activeAgents.Contains(agent))
+        {
+            activeAgents.Remove(agent);
+            
+            if (activeAgents.Count == 0)
+            {
+                EndGeneration();
+            }
         }
     }
 
     private void FindAgents()
     {
-        // Find all MonoBehaviours that implement IEvolutionAgent
-        // This is a bit expensive, so do it only on Start or when needed
         agents.Clear();
         var found = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<IEvolutionAgent>();
         agents.AddRange(found);
         Debug.Log($"[EvolutionManager] Found {agents.Count} agents.");
+    }
+
+    public int GetAgentCount()
+    {
+        return agents.Count;
     }
 
     private void StartGeneration()
@@ -65,14 +96,11 @@ public class EvolutionManager : MonoBehaviour
         timer = 0f;
         Debug.Log($"[EvolutionManager] Generation {generationCount} Started.");
         
-        // Reset all agents
+        activeAgents.Clear();
         foreach (var agent in agents)
         {
             agent.ResetFitness();
-            // Note: We don't force Agent.EndEpisode() here because PPO might be running its own episodes.
-            // But for "Evolution", we usually want a synchronized start.
-            // If we want to sync with ML-Agents episodes, we might need to force a reset.
-            // For now, we just reset fitness tracking.
+            activeAgents.Add(agent);
         }
     }
 
@@ -101,6 +129,12 @@ public class EvolutionManager : MonoBehaviour
 
         Debug.Log($"[EvolutionManager] Generation {generationCount} Ended. Best: {bestFitness:F2}, Avg: {avgFitness:F2}");
 
+        // Log to TensorBoard
+        Academy.Instance.StatsRecorder.Add("Evolution/BestFitness", bestFitness, StatAggregationMethod.Average);
+        Academy.Instance.StatsRecorder.Add("Evolution/AvgFitness", avgFitness, StatAggregationMethod.Average);
+        Academy.Instance.StatsRecorder.Add("Evolution/WorstFitness", worstFitness, StatAggregationMethod.Average);
+        Academy.Instance.StatsRecorder.Add("Evolution/Generation", generationCount, StatAggregationMethod.Average);
+
         // 4. Handle Elites
         foreach (var elite in elites)
         {
@@ -121,7 +155,6 @@ public class EvolutionManager : MonoBehaviour
             else
             {
                 // Just reset
-                // other.ResetFitness(); // Will be done in StartGeneration anyway
             }
         }
 
@@ -132,9 +165,6 @@ public class EvolutionManager : MonoBehaviour
 
     private void RespawnAsChild(IEvolutionAgent child, IEvolutionAgent parent)
     {
-        // Simple respawn logic: Move child to parent's position + slight offset
-        // We need to access the Transform. IEvolutionAgent has .gameObject property.
-        
         Transform parentTrans = parent.gameObject.transform;
         Transform childTrans = child.gameObject.transform;
 
@@ -149,15 +179,6 @@ public class EvolutionManager : MonoBehaviour
         // Teleport
         childTrans.position = parentTrans.position;
         childTrans.rotation = parentTrans.rotation;
-        
-        // Optional: Mutate? 
-        // In PPO + Evolution, mutation is usually handled by the Policy update (PPO).
-        // Here we just "select" the starting state or keep the agent alive.
-        // If we wanted to copy Neural Network weights, we would need to access the Policy.
-        // But the user asked for "PPO + Evolution" where PPO learns. 
-        // Usually this means: PPO updates weights. Evolution just selects WHO continues or resets positions.
-        // If we just move the "bad" agents to the "good" agents' positions, we are essentially 
-        // doing "Go-Explore" or "Imitation" by position.
     }
 
     private void OnGUI()
@@ -165,7 +186,7 @@ public class EvolutionManager : MonoBehaviour
         if (!showGUI) return;
 
         float w = 250;
-        float h = 150;
+        float h = 180; // Increased height for more info
         float x = Screen.width - w - 10;
         float y = 10;
 
@@ -173,11 +194,23 @@ public class EvolutionManager : MonoBehaviour
 
         GUILayout.BeginArea(new Rect(x + 10, y + 25, w - 20, h - 30));
         GUILayout.Label($"Generation: {generationCount}");
-        GUILayout.Label($"Time: {timer:F1} / {generationDuration:F1} s");
+        if (generationMode == GenerationMode.TimeBased)
+            GUILayout.Label($"Time: {timer:F1} / {generationDuration:F1} s");
+        else
+            GUILayout.Label($"Time: {timer:F1} s (Survival)");
+            
         GUILayout.Space(5);
+        
+        // Agent info
+        int aliveCount = agents.Count - activeAgents.Count(a => a.IsDone);
+        GUILayout.Label($"Agents: {agents.Count} total, {aliveCount} alive");
+        
+        GUILayout.Space(3);
         GUILayout.Label($"Best Fitness: {bestFitness:F2}");
         GUILayout.Label($"Avg Fitness: {avgFitness:F2}");
         GUILayout.Label($"Survivors: {survivorsCount} / {agents.Count}");
+        if (generationMode == GenerationMode.Survival)
+            GUILayout.Label($"Active: {activeAgents.Count}");
         GUILayout.EndArea();
     }
 }

@@ -12,6 +12,7 @@ namespace Assets.Skripts
 
         private NewCarController carController;
         private ForkController forkController;
+        private FitnessTracker fitnessTracker;
 
         // In Ihrem ForkliftController.cs
         public float MoveInput { get; private set; }
@@ -24,6 +25,7 @@ namespace Assets.Skripts
         {
             carController = GetComponent<NewCarController>();
             forkController = GetComponent<ForkController>();
+            fitnessTracker = GetComponent<FitnessTracker>();
         }
 
         private void FixedUpdate()
@@ -42,6 +44,9 @@ namespace Assets.Skripts
 
         private void ApplyCarInput()
         {
+            // Don't move if agent is done
+            if (fitnessTracker != null && fitnessTracker.IsDone) return;
+
             float accel = Mathf.Max(0f, MoveInput);
             float footbrake = Mathf.Min(0f, MoveInput);
 
@@ -72,6 +77,9 @@ namespace Assets.Skripts
 
         private void ApplyForkInput()
         {
+            // Don't move fork if agent is done
+            if (fitnessTracker != null && fitnessTracker.IsDone) return;
+
             forkController.SetForkInput(ForkInput);
         }
     }

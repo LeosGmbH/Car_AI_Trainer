@@ -11,6 +11,12 @@ public class MLAgentController : Agent
     [Header("Settings")]
     [SerializeField] public string levelName;
 
+    [Header("Multi-Agent Setup")]
+    [Tooltip("Agent index for Physics Layer isolation (0-29)")]
+    public int agentIndex = 0;
+
+    private FitnessTracker fitnessTracker;
+
     [Header("Referenzen")]
     public DropZoneManager dropZoneManager;
     public Transform dropZoneTransform;
@@ -42,6 +48,7 @@ public class MLAgentController : Agent
     private Vector3 mastStartPos;
 
     private int totalPalletsInScene;
+    private bool isFirstEpisode = true;
     
     // Helper classes
     private MLAgentPerceptionHelper perceptionHelper;
@@ -60,6 +67,33 @@ public class MLAgentController : Agent
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
         
+        // Try to find FitnessTracker if not assigned
+        if (fitnessTracker == null)
+        {
+            fitnessTracker = GetComponent<FitnessTracker>();
+        }
+
+        // Set Physics Layer for ghost agent isolation
+        int targetLayer = LayerMask.NameToLayer($"Agent_{agentIndex+1}"); // D2 = 2 digits with leading zero
+        if (targetLayer != -1)
+        {
+            SetLayerRecursively(gameObject, targetLayer);
+        }
+        else
+        {
+            Debug.LogWarning($"[MLAgentController] Layer 'Agent_{agentIndex+1:D2}' not found! Please create it in Project Settings > Tags and Layers.");
+        }
+
+        // Find agent-specific pallet parent if not assigned
+        if (palletParent == null)
+        {
+            palletParent = GameObject.Find($"Pallets ({agentIndex+1})");
+            if (palletParent == null)
+            {
+                Debug.LogError($"[MLAgentController] Could not find 'Pallets ({agentIndex + 1})'! Make sure it exists in the scene.");
+            }
+        }
+
         // Initialize helpers
         perceptionHelper = new MLAgentPerceptionHelper(transform, palletParent, dropZoneManager);
         rewardHandler = new MLAgentRewardHandler(this, dropZoneManager, rb, forkTransform, perceptionHelper, minY, maxY);
@@ -68,11 +102,40 @@ public class MLAgentController : Agent
         totalPalletsInScene = perceptionHelper.GetTotalPalletCount();
     }
 
+    private void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
-        enviromentController.ResetObjectPositions(dropZoneTransform);
+        // 1. Check if this is a PPO-triggered reset that we didn't catch
+        if (!isFirstEpisode && fitnessTracker != null && !fitnessTracker.IsDone)
+        {
+            var evoManager = Object.FindFirstObjectByType<EvolutionManager>();
+            if (evoManager != null && evoManager.generationMode == EvolutionManager.GenerationMode.Survival)
+            {
+                fitnessTracker.MarkAsDone();
+            }
+        }
+        isFirstEpisode = false;
+
+        // 2. SURVIVAL MODE CHECK: If Done, stay frozen
+        if (fitnessTracker != null && fitnessTracker.IsDone)
+        {
+            // Set kinematic FIRST, then velocity (order matters!)
+            if (!rb.isKinematic) rb.isKinematic = true;
+            return; 
+        }
+
+        enviromentController.ResetObjectPositions(dropZoneTransform, agentIndex);
         Academy.Instance.StatsRecorder.Add($"Lvls/{levelName}/EpisodesCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/EpisodesCount", 1, StatAggregationMethod.Sum);
+        rb.isKinematic = false; // Ensure physics is on FIRST
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.localPosition = startPos;
@@ -91,6 +154,13 @@ public class MLAgentController : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        // If done, send zeros or last state? Zeros is probably safer to avoid noise.
+        if (fitnessTracker != null && fitnessTracker.IsDone)
+        {
+            for(int i=0; i<10; i++) sensor.AddObservation(0f);
+            return;
+        }
+
         perceptionHelper.FindClosestPallets();
 
         // Vector Observation Size: 10 Floats
@@ -131,6 +201,8 @@ public class MLAgentController : Agent
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        if (fitnessTracker != null && fitnessTracker.IsDone) return;
+
         // 1. Aktionen extrahieren
         float moveInput = actions.ContinuousActions[0];
         float rotateInput = actions.ContinuousActions[1];
@@ -157,11 +229,14 @@ public class MLAgentController : Agent
         if (dropZoneManager.IsComplete(totalPalletsInScene))
         {
             rewardHandler.ReachGoal(StepCount, MaxStep);
+            if (fitnessTracker != null) fitnessTracker.MarkAsDone();
         }
 
         if (StepCount >= MaxStep)
         {
             rewardHandler.Die();
+            if (fitnessTracker != null) fitnessTracker.MarkAsDone();
+
             Academy.Instance.StatsRecorder.Add("Result/WallCollision", 0, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add("Result/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add("Result/DieMaxStep", 1, StatAggregationMethod.Sum);
@@ -184,7 +259,9 @@ public class MLAgentController : Agent
             Academy.Instance.StatsRecorder.Add($"Result/{levelName}/WallCollision", 1, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add($"Result/{levelName}/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add($"Result/{levelName}/DieMaxStep", 0, StatAggregationMethod.Sum);
+            
             rewardHandler.Die();
+            if (fitnessTracker != null) fitnessTracker.MarkAsDone();
         }
     }
 
@@ -212,6 +289,10 @@ public class MLAgentController : Agent
     public void AddAgentReward(float ammount)
     {
         AddReward(ammount);
+        if (fitnessTracker != null)
+        {
+            fitnessTracker.AddFitness(ammount);
+        }
     }
 
 
@@ -231,6 +312,7 @@ public class MLAgentController : Agent
             // --- ALLGEMEIN ---
             { "--- AGENT ZUSTAND ---", "" },
             { "Cum. Reward", GetCumulativeReward().ToString("F4") },
+            { "Fitness", fitnessTracker != null ? fitnessTracker.GetFitness().ToString("F4") : "N/A" },
             { "Steps", $"{StepCount} / {MaxStep}" },
             { "Total Paletten", totalPalletsInScene.ToString() },
             { "Gesicherte Paletten", dropZoneManager.GetCount().ToString() },
