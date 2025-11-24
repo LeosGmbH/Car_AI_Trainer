@@ -47,3 +47,8 @@ max steps erreicht = Tod
 Tod: -20 Strafe & Episode Ende.
 
 Alle palleten befinden sich in der dropzone und agent befindet sich für 2 sekunden nichtmehr in dropzone = +40 reward und Reachgole ( episode end)
+
+
+
+Baue für alles Hilfreiche passende Academy.Instance.StatsRecorder.Add() ein.. Achte darauf das sie nicht mit anderen bereits vorhandenen kollidieren, falls ja passe sie an..
+bennne sie gut und sortiere sie in passenden gruppen.

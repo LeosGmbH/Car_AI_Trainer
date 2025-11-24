@@ -70,7 +70,7 @@ public class MLAgentController : Agent
 
     public override void OnEpisodeBegin()
     {
-        enviromentController.ResetObjectPositions();
+        enviromentController.ResetObjectPositions(dropZoneTransform);
         Academy.Instance.StatsRecorder.Add($"Lvls/{levelName}/EpisodesCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/EpisodesCount", 1, StatAggregationMethod.Sum);
         rb.linearVelocity = Vector3.zero;

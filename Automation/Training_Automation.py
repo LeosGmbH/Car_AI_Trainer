@@ -11,8 +11,8 @@ yaml = YAML()
 
 
 WORK_DIR = r"E:\LEO_X9\Projekte\Unity\Car_AI_Trainer"
-ENV_PATH = r"Builds\Level01_02_05_V3\Car_AI_Tainer.exe"
-RUN_ID = "AT_01_02_05_LVL_V03"
+ENV_PATH = r"Builds\Level02\Car_AI_Tainer.exe"
+RUN_ID = "Level02_V1"
 BASED_ON_ID = "" 
 
 MAX_TOTAL_STEPS = 30_000_000
@@ -117,6 +117,13 @@ def main():
     first_run = True      
     continue_training = False  
     based_on = False
+    
+    # first_run = False      
+    # continue_training = True  
+    # based_on = False
+
+    # STRG K C 
+    # STRG K U
 
     for _ in range(0, MAX_TOTAL_STEPS, STEP_INCREMENT):
         config = load_config(CONFIG_FILE)

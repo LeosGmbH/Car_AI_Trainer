@@ -1,0 +1,21 @@
+[2025-11-24 20:47:04] Neues Training mit max_steps=1000000, learning_rate=0.0005, beta=0.08, epsilon=0.2
+[2025-11-24 20:47:04] Aktuelle Trainings-ID: Level02_V1
+
+[2025-11-24 20:59:04] Neues Training mit max_steps=2000000, learning_rate=0.00058, beta=0.0824, epsilon=0.203
+
+[2025-11-24 21:11:04] Neues Training mit max_steps=3000000, learning_rate=0.00066, beta=0.0848, epsilon=0.206
+
+[2025-11-24 21:23:04] Neues Training mit max_steps=4000000, learning_rate=0.00072, beta=0.0864, epsilon=0.208
+
+[2025-11-24 21:35:04] Neues Training mit max_steps=5000000, learning_rate=0.00078, beta=0.088, epsilon=0.21
+
+[2025-11-24 21:47:05] Neues Training mit max_steps=6000000, learning_rate=0.00082, beta=0.0888, epsilon=0.211
+
+[2025-11-24 21:57:05] Neues Training mit max_steps=7000000, learning_rate=0.00086, beta=0.0896, epsilon=0.212
+
+[2025-11-24 22:02:25] Neues Training mit max_steps=7000000, learning_rate=0.00086, beta=0.0896, epsilon=0.212
+
+[2025-11-24 22:10:25] Neues Training mit max_steps=8000000, learning_rate=0.00088, beta=0.09032, epsilon=0.2129
+
+[2025-11-24 22:22:25] Neues Training mit max_steps=9000000, learning_rate=0.0009, beta=0.09104, epsilon=0.2138
+
