@@ -27,7 +27,7 @@ public class MLAgentController : Agent
     public InputActionReference handbrakeActionRef;
 
 
-    // Limits für Normalisierung (müssen mit Ihrem Controller übereinstimmen)
+    // Limits für Normalisierung (müssen mit Ihrem Controller übereinstimmen) 
     public float minY = 0.0f;
     public float maxY = 2.0f;
 
@@ -159,12 +159,18 @@ public class MLAgentController : Agent
         // 4. Episoden-Ende prüfen
         if (dropZoneManager.IsComplete(totalPalletsInScene))
         {
-            rewardHandler.ReachGoal(StepCount, MaxStep, totalPalletsInScene);
+            rewardHandler.ReachGoal(StepCount, MaxStep);
         }
 
         if (StepCount >= MaxStep)
         {
             rewardHandler.Die();
+            Academy.Instance.StatsRecorder.Add("Result/WallCollision", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Result/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Result/DieMaxStep", 1, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/WallCollision", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/DieMaxStep", 1, StatAggregationMethod.Sum);
             Debug.Log("Died, Steps überschritten");
         }
 
@@ -175,7 +181,12 @@ public class MLAgentController : Agent
     {
         if (collision.gameObject.CompareTag("wall"))
         {
-            Academy.Instance.StatsRecorder.Add("Events/WallCollision", 1, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Result/WallCollision", 1, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Result/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Result/DieMaxStep", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/WallCollision", 1, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add($"Result/{levelName}/DieMaxStep", 0, StatAggregationMethod.Sum);
             rewardHandler.Die();
         }
     }
