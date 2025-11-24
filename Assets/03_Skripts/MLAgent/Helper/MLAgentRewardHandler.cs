@@ -116,13 +116,13 @@ public class MLAgentRewardHandler
         }
         float jitterReward = -0.005f * jitterPenalty;
         agent.AddReward(jitterReward);
-        Academy.Instance.StatsRecorder.Add("Penalty/Jitter", jitterReward, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add("Penalty/Jitter", jitterReward, StatAggregationMethod.Average);
 
         // 3. Stillstand
         if (rb.linearVelocity.magnitude < 0.1f)
         {
             agent.AddReward(-0.1f);
-            Academy.Instance.StatsRecorder.Add("Penalty/Standstill", -0.1f, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Penalty/Standstill", -0.1f, StatAggregationMethod.Average);
         }
 
         // 4. Bewegung (Vorwärts/Rückwärts)
@@ -135,7 +135,7 @@ public class MLAgentRewardHandler
             if (forwardMoveTimer > 0.2f)
             {
                 agent.AddReward(0.05f);
-                Academy.Instance.StatsRecorder.Add("Reward/ForwardMovement", 0.05f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Reward/ForwardMovement", 0.05f, StatAggregationMethod.Average);
             }
         }
         else
@@ -150,7 +150,7 @@ public class MLAgentRewardHandler
             if (backwardMoveTimer > 0.2f)
             {
                 agent.AddReward(0.015f);
-                Academy.Instance.StatsRecorder.Add("Reward/BackwardMovement", 0.015f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Reward/BackwardMovement", 0.015f, StatAggregationMethod.Average);
             }
         }
         else
@@ -182,7 +182,7 @@ public class MLAgentRewardHandler
                 if (dx < 1.0f && dz < 1.0f)
                 {
                     agent.AddReward(-0.1f);
-                    Academy.Instance.StatsRecorder.Add("Penalty/NoPositionChange", -0.1f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Penalty/NoPositionChange", -0.1f, StatAggregationMethod.Average);
                 }
             }
         }
@@ -201,7 +201,7 @@ public class MLAgentRewardHandler
         if (currentPalletCount > maxPalletsInZone)
         {
             agent.AddReward(10f);
-            Academy.Instance.StatsRecorder.Add("Reward/PalletEnterZone", 10f, StatAggregationMethod.Sum);
+            Academy.Instance.StatsRecorder.Add("Reward/PalletEnterZoneCount", 1f, StatAggregationMethod.Sum);
             maxPalletsInZone = currentPalletCount;
         }
 
@@ -223,14 +223,14 @@ public class MLAgentRewardHandler
             if (forkY > 0.15f)
             {
                 agent.AddReward(-0.01f);
-                Academy.Instance.StatsRecorder.Add("Penalty/Phase1_ForkHigh", -0.01f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/Phase1_ForkHigh", -0.01f, StatAggregationMethod.Average);
             }
 
             // Agent in DropZone
             if (isInDropZone)
             {
                 agent.AddReward(-0.5f);
-                Academy.Instance.StatsRecorder.Add("Penalty/Phase1_InDropZone", -0.5f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/Phase1_InDropZone", -0.5f, StatAggregationMethod.Average);
             }
         }
         else if (isTouched && !isLifted)
@@ -243,7 +243,7 @@ public class MLAgentRewardHandler
                 if (Time.time - lastTimeTouched >= 5.0f)
                 {
                     agent.AddReward(5f);
-                    Academy.Instance.StatsRecorder.Add("Reward/Phase2_Touch", 5f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Reward/Phase2_TouchCount", 1f, StatAggregationMethod.Sum);
                     lastTimeTouched = Time.time;
                 }
             }
@@ -252,7 +252,7 @@ public class MLAgentRewardHandler
             if (forkY < 0.2f)
             {
                 agent.AddReward(-0.05f);
-                Academy.Instance.StatsRecorder.Add("Penalty/Phase2_Dragging", -0.05f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/Phase2_Dragging", -0.05f, StatAggregationMethod.Average);
             }
         }
         else if (isTouched && isLifted)
@@ -265,7 +265,7 @@ public class MLAgentRewardHandler
                 if (Time.time - lastTimeLifted >= 5.0f)
                 {
                     agent.AddReward(5f);
-                    Academy.Instance.StatsRecorder.Add("Reward/Phase3_Lift", 5f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Reward/Phase3_LiftCount", 1f, StatAggregationMethod.Sum);
                     lastTimeLifted = Time.time;
                 }
             }
@@ -276,7 +276,7 @@ public class MLAgentRewardHandler
             if (forkY > 1.0f)
             {
                 agent.AddReward(-0.05f);
-                Academy.Instance.StatsRecorder.Add("Penalty/Phase3_ForkHigh", -0.05f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/Phase3_ForkHigh", -0.05f, StatAggregationMethod.Average);
             }
         }
 
@@ -292,13 +292,13 @@ public class MLAgentRewardHandler
             if (!isInDropZone)
             {
                 agent.AddReward(-10f);
-                Academy.Instance.StatsRecorder.Add("Penalty/DropOutsideZone_Touch", -10f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/DropOutsideZone_TouchCount", -1f, StatAggregationMethod.Sum);
             }
             else
             {
                 // "Palette ist in der Zone und IsPalletTouched wird = false = Einmalige belohung +10"
                 agent.AddReward(10f);
-                Academy.Instance.StatsRecorder.Add("Reward/DropInZone", 10f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Reward/DropInZoneCount", 1f, StatAggregationMethod.Sum);
             }
         }
 
@@ -308,7 +308,7 @@ public class MLAgentRewardHandler
             if (!isInDropZone)
             {
                 agent.AddReward(-10f);
-                Academy.Instance.StatsRecorder.Add("Penalty/DropOutsideZone_Lift", -10f, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Penalty/DropOutsideZone_LiftCount", -1f, StatAggregationMethod.Sum);
             }
         }
 
@@ -322,21 +322,21 @@ public class MLAgentRewardHandler
                 if (forkY > 0.2f)
                 {
                     agent.AddReward(-0.5f);
-                    Academy.Instance.StatsRecorder.Add("Penalty/Phase4_ForkHigh", -0.5f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Penalty/Phase4_ForkHigh", -0.5f, StatAggregationMethod.Average);
                 }
 
                 // Gabel unten (y < 0.2) und vorwärts
                 if (forkY < 0.2f && moveInput > 0.1f)
                 {
                     agent.AddReward(-1.0f);
-                    Academy.Instance.StatsRecorder.Add("Penalty/Phase4_DriveThrough", -1.0f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Penalty/Phase4_DriveThrough", -1.0f, StatAggregationMethod.Average);
                 }
 
                 // Gabel unten (y < 0.2) und rückwärts
                 if (forkY < 0.2f && moveInput < -0.1f)
                 {
                     agent.AddReward(1.0f);
-                    Academy.Instance.StatsRecorder.Add("Reward/Phase4_BackOut", 1.0f, StatAggregationMethod.Sum);
+                    Academy.Instance.StatsRecorder.Add("Reward/Phase4_BackOut", 1.0f, StatAggregationMethod.Average);
                 }
             }
         }
@@ -403,7 +403,7 @@ public class MLAgentRewardHandler
                     if (diff > 0) 
                     {
                         agent.AddReward(0.1f * diff);
-                        Academy.Instance.StatsRecorder.Add("Reward/Phase1_Approach", 0.1f * diff, StatAggregationMethod.Sum);
+                        Academy.Instance.StatsRecorder.Add("Reward/Phase1_Approach", 0.1f * diff, StatAggregationMethod.Average);
                     }
                 }
                 lastDistToPallet = dist;
@@ -423,7 +423,7 @@ public class MLAgentRewardHandler
                 float diff = lastDistToZone - dist;
                 // Reward: +0.5 * Distanzänderung
                 agent.AddReward(0.5f * diff);
-                Academy.Instance.StatsRecorder.Add("Reward/Phase3_ApproachZone", 0.5f * diff, StatAggregationMethod.Sum);
+                Academy.Instance.StatsRecorder.Add("Reward/Phase3_ApproachZone", 0.5f * diff, StatAggregationMethod.Average);
             }
             lastDistToZone = dist;
             lastDistToPallet = -1f; 
@@ -439,7 +439,9 @@ public class MLAgentRewardHandler
     {
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/DiedCount", 1, StatAggregationMethod.Sum);
-        
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 0, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add("WinDeathRatio/SurvivedCount", 0, StatAggregationMethod.Sum);
+
         // "Tod: -20 Strafe & Episode Ende"
         agent.AddReward(-20f);
         agent.EndEpisode();
@@ -453,6 +455,8 @@ public class MLAgentRewardHandler
 
         Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/SurvivedCount", 1, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("WinDeathRatio/SurvivedCount", 1, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add($"Lvls/{agent.levelName}/DiedCount", 0, StatAggregationMethod.Sum);
+        Academy.Instance.StatsRecorder.Add("WinDeathRatio/DiedCount", 0, StatAggregationMethod.Sum);
         Academy.Instance.StatsRecorder.Add("Agent/winReward", agent.GetCumulativeReward(), StatAggregationMethod.Average);
         
         agent.EndEpisode();
