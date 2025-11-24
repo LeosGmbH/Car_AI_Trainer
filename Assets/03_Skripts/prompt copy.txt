@@ -1,0 +1,115 @@
+# Prompt für AI-IDE (Cursor/Windsurf/etc.)
+
+Ich möchte evolutionäre Selektion zu meinem bestehenden Unity ML-Agents PPO-Projekt hinzufügen.
+
+## Ziel:
+Implementiere ein "PPO + Evolution" System, bei dem:
+- PPO-Training normal weiterläuft
+- Agenten individuelle Fitness tracken
+- Nach jeder Generation  nur die besten X% überleben
+- Schwache Agenten sterben oder werden zurückgesetzt
+- PPO lernt dadurch immer mehr von erfolgreichen Verhaltensweisen
+
+## Was du tun sollst:
+
+### 1. Analysiere meine bestehenden Agent-Scripts
+- Finde alle Scripts die von `Unity.MLAgents` erben
+- Verstehe meine aktuelle Reward-Struktur
+- Identifiziere wo Agenten Punkte bekommen/verlieren
+
+### 2. Erstelle neue Scripts:
+
+#### `IEvolutionAgent.cs` (Interface)
+```csharp
+// Interface das meine bestehenden Agents implementieren sollen
+// Methoden: GetFitness(), ResetFitness(), Die(), IsAlive()
+```
+
+#### `EvolutionManager.cs` (Manager)
+```csharp
+// Hauptlogik für Generationen:
+// - Timer für Generation-Länge
+// - Sammelt alle IEvolutionAgent in der Szene
+// - Sortiert nach Fitness
+// - Selektiert beste X%
+// - Tötet/resettet schwache Agenten
+// - Debug-Logs und Statistiken
+```
+
+#### `FitnessTracker.cs` (Component)
+```csharp
+// Kann als Component zu bestehenden Agents hinzugefügt werden
+// Trackt Fitness parallel zu ML-Agents Rewards
+// Implementiert IEvolutionAgent Interface
+```
+
+### 3. Passe meine bestehenden Agent-Scripts minimal an:
+- Füge IEvolutionAgent Interface hinzu (oder nutze FitnessTracker Component)
+- Füge in relevanten Stellen Fitness-Updates hinzu (parallel zu AddReward)
+- Mache minimal-invasive Änderungen - erhalte bestehende Funktionalität
+
+### 4. Erstelle Setup-Anleitung:
+- Welches GameObject bekommt EvolutionManager
+- Müssen Agents FitnessTracker Component bekommen oder Interface implementieren?
+- Welche Parameter können angepasst werden
+
+## Code-Anforderungen:
+
+###  Muss:
+- Kompatibel mit bestehendem ML-Agents PPO-Training
+- Keine oder wenig Änderungen an PPO-Config/Training nötig
+- Modular und wiederverwendbar
+- dezent und spaarsam kommentiert
+- Anpassbare Parameter (Inspector-freundlich)
+- Debug-Logs für jede Generation (oder noch besser eine schöne visuelle daarstellung z.b. mit einem OnGUI)
+
+###  Nice-to-have:
+- Farbcodierung: Elite = Grün, Normal = Weiß, Tot = Schwarz
+- Optional: Respawn-Mode (Tote werden als Kinder der Elite wiedergeboren)
+- Optional(aber sehr gerne): Runtime UI mit Generation-Statistiken
+- Event-System für Generation-Wechsel
+
+## Architektur-Vorschlag (du kannst besser entscheiden):
+```
+Option A - Component-basiert:
+AgentScript (besteht) + FitnessTracker (neu) → IEvolutionAgent
+                           ↓
+                   EvolutionManager (sammelt alle)
+
+Option B - Interface direkt:
+AgentScript (besteht) implements IEvolutionAgent
+                           ↓
+                   EvolutionManager (sammelt alle)
+
+Option C - Wrapper:
+AgentScript (besteht, unverändert)
+                           ↓
+                   EvolutionWrapper (neu, wrapper um Agent)
+                           ↓
+                   EvolutionManager
+```
+
+Wähle die beste Option basierend auf meinem Code.
+
+## Ausgabe:
+
+Erstelle bitte:
+1. Alle neuen Scripts (vollständig)
+2. Setup-Anleitung:
+   - Welche GameObjects brauchen welche Components
+   - Empfohlene Parameter-Werte
+   - Wie teste ich ob es funktioniert
+3. Kurze Erklärung deiner Architektur-Entscheidung
+in einer Readme.md datei 
+
+## Erfolgs-Kriterien:
+Nach der Implementierung sollte:
+1. PPO-Training normal weiterlaufen (mlagents-learn funktioniert)
+2. Console zeigt Generation-Statistiken (Beste/Durchschnitt/Schlechteste Fitness)
+3. Weniger Agenten bewegen sich nach jeder Generation
+4. Überlebende Agenten zeigen besseres Verhalten
+
+
+---
+
+Analysiere meinen Code und implementiere die beste Lösung! 

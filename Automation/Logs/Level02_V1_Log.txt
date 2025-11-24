@@ -19,3 +19,9 @@
 
 [2025-11-24 22:22:25] Neues Training mit max_steps=9000000, learning_rate=0.0009, beta=0.09104, epsilon=0.2138
 
+[2025-11-24 22:34:25] Neues Training mit max_steps=10000000, learning_rate=0.00091, beta=0.09168, epsilon=0.2146
+
+[2025-11-24 22:46:25] Neues Training mit max_steps=11000000, learning_rate=0.00092, beta=0.09232, epsilon=0.2154
+
+[2025-11-24 22:58:25] Neues Training mit max_steps=12000000, learning_rate=0.000925, beta=0.09152, epsilon=0.2144
+
