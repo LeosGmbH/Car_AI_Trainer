@@ -1,72 +1,49 @@
-KI CODE-GENERIERUNGS-PROMPT: OPTIMIERUNG DER ML-AGENT BELOHNUNGSFUNKTION
-Ziel: Implementiere die folgenden Änderungen in der Klasse MLAgentController, um das Lernen und die Strategieentwicklung des Gabelstapler-Agenten zu verbessern.
-I. ANPASSUNGEN DER KLASSENSTRUKTUR
-Füge folgende private Variablen am Anfang der Klasse hinzu:
-private Transform[] closestPallets = new Transform[5];
-private float lastDistanceToClosestPallet = float.MaxValue;
-private float[] lastActions = new float[4];
-NEUE HILFSFUNKTION: FIND CLOSEST PALLET
-Definiere eine private Funktion FindClosestPallet(), die:
-Alle ungesicherten Paletten (unter palletParent) identifiziert.
-Die Distanz jeder ungesicherten Palette zum Agenten misst.
-Den Transform der nächstgelegenen ungesicherten Palette in die Variable closestPallets[0] speichert.
-Die Transforms der vier weiteren nächstgelegenen Paletten in closestPallets[1] bis [4] speichert.
-II. COLLECT OBSERVATIONS ERWEITERUNG
-Erweitere die Methode CollectObservations:
-Führe die Funktion FindClosestPallet() aus.
-Iteriere über das Array closestPallets (von 0 bis 4).
-Für jede gefundene Palette:
-a. Füge die relative Position der Palette zum Agenten (nur X und Z) als normalisierten Float hinzu (mit sensor.AddObservation).
-b. Füge den Zustand der Palette hinzu (z.B. 1.0f für ungesichert).
-III. ON ACTION RECEIVED ÄNDERUNGEN
-Am Ende der Methode OnActionReceived (nach dem Aufruf von ApplyRewardLogic):
-Speichere die aktuellen ContinuousActions [0] bis [3] in das Array lastActions.
-IV. APPLY REWARD LOGIC NEU-IMPLEMENTIERUNG
-Passe die Methode ApplyRewardLogic(float forkInput) wie folgt an:
-Entferne die alte Gabel-Jitter-Strafe (die forkInput verwendet).
-Behalte die Basis-Zeitstrafe bei: AddReward(-0.001f);
-Behalte die Haupt-Paletten-Logik bei (Belohnung/Strafe für currentCount vs. lastFramePalletCount).
-A. BELOHNUNG FÜR FAHRTÄTIGKEIT (ANTI-STILLSTAND)
-Belohne Bewegung, um Stehenbleiben zu verhindern:
-if (rb.linearVelocity.magnitude > 0.1f)
-{
-AddReward(0.003f);
-}
-B. STRATEGISCHE ANNÄHERUNG
-Belohnt die Annäherung an das nächstgelegene unbesicherte Ziel:
-float currentDistance = Vector3.Distance(transform.position, closestPallets[0].position);
-if (lastDistanceToClosestPallet != float.MaxValue)
-{
-float distanceDelta = lastDistanceToClosestPallet - currentDistance;
-AddReward(0.01f * distanceDelta);
-}
-lastDistanceToClosestPallet = currentDistance;
-C. GABEL-POSITIONS-LOGIK
-Definiere forkNorm als normalisierte Gabelhöhe $[0, 1]$. Definiere isPalletHeld als IsPalletLifted. Definiere isInDropZone durch einen Aufruf im dropZoneManager (Annahme: die Funktion dropZoneManager.IsAgentInDropZone(transform.position) existiert).
-KEINE PALETTE GEHALTEN (isPalletHeld == false)
-Belohnung für Gabel unten (bereit zur Aufnahme): AddReward(0.002f * (1.0f - forkNorm));
-Strafe für Gabel oben (ineffizient ohne Palette): AddReward(-0.001f * forkNorm);
-PALETTE GEHALTEN (isPalletHeld == true)
-TRANSPORT (Nicht in DropZone):
-Belohnung für Gabel oben (sicherer Transport): AddReward(0.002f * forkNorm);
-Strafe für Gabel unten (Gefahr der Kollision): AddReward(-0.001f * (1.0f - forkNorm));
-IN DROPZONE (Vorbereitung zum Absetzen):
-Hohe Belohnung für Gabel unten (bereit zum Absetzen): AddReward(0.005f * (1.0f - forkNorm));
-Hohe Strafe für Gabel oben (verhindert das Absetzen): AddReward(-0.005f * forkNorm);
-D. STRAFEN FÜR STILLSTAND UND JITTER
-Stillstands-Strafe:
-if (rb.linearVelocity.magnitude < 0.1f)
-{
-AddReward(-0.005f);
-}
-Anti-Jitter/Steuerungs-Stabilität (Bestraft schnelle Aktionswechsel):
-float jitterPenalty = 0f;
-if (lastActions[0] != 0f)
-{
-for (int i = 0; i < 4; i++)
-{
-jitterPenalty += Mathf.Abs(actions.ContinuousActions[i] - lastActions[i]);
-}
-}
-AddReward(-0.002f * jitterPenalty);
+Generelle Rewards/penaltys (gelten immer):
+Zeitstrafe: -0.001 pro Schritt.
+Zittrige Steuerung: -0.005 * Änderungsrate.
+Stillstand: -0.1 pro Schritt, wenn velocity.magnitude < 0.1.
+Bewegung: Belohung +0.05 pro step wenn er sich  vorwärts bewegt ( erst ab 0.2 sekunden vorwärtsfahren)
+Bewegung: Belohung +0.015 pro step wenn er sich rückwärts bewegt ( erst ab 0.2 sekunden vorwärtsfahren)
+Bestrafung -0.1 pro step wenn  sich seine position in 0.5 sekunden nicht um +- 1  in x oder z richtung ändert
 
+Phase 1: Agent  IsPalletTouched und IsPalletLifted =false
+Belohnung:
+Annäherung an nächste Palette: +0.1 * Distanzänderung.
+Bestrafung:
+Gabel ist zu hoch  (forkTransform. y > 0.4): -0.01 pro Schritt.
+Agent befindet sich in der Dropzone: -0.5 pro Schritt
+
+Phase 2: Agent IsPalletTouched=true , IsPalletLifted=false
+Belohnung (einmalig pro Berühren, cooldown = 5 sekunden, wird nur beim übergang von false zu true belohnt, nicht dauerhaft beim tragen): +5 
+
+Bestrafung:
+Palette schleift am Boden (Gabel y < 0.2): -0.05 pro Schritt.
+
+
+Phase 3: Agent IsPalletTouched=true , IsPalletLifted=true
+Belohnung (einmalig pro Aufheben, cooldown 5 sekunden. wird nur beim übergang von false zu true belohnt, nicht dauerhaft beim tragen): +5 
+Belohnung:Annäherung an Dropzone: +0.5 * Distanzänderung.
+bestrafung: Palette wird zu hoch gehalten (Gabel y > 1.0): -0.05 pro Schritt.*
+
+
+Bestrafungen phase 2 und 3 zusammengefasst: 
+Zustand = IsPalletTouched=true , IsPalletLifted=false, Pallete befindeet sich NICHT in der Dropzone und IsPalletTouched wird wieder false = strafe -10.
+Zustand = IsPalletTouched=true , IsPalletLifted=true, Pallete befindeet sich NICHT in der Dropzone und IsPalletLifted wird wieder false = strafe -10.
+(Also insgesammt -20 wenn palette abgelegt wird ohne in der dropzone zu sein)
+
+
+Phase 4: Palette befindet sich in der Dropzone
+Palette betritt die Zone : Einmalig +10 Belohnung ( nicht wiederholbar indem man rein und raus fährt).
+IsPalletTouched= true und Gabel ist zu hoch (y > 0.2): -0.5 pro Schritt (zwingt zum Absenken).
+IsPalletTouched und Gabel ist unten (y < 0.2) und Agent fährt vorwärts: -1.0 pro Schritt (verhindert Durchfahren).
+IsPalletTouched und Gabel ist unten (y < 0.2) und Agent fährt rückwärts: +1 pro Schritt (belohnt das Rausfahren).
+palette ist in der Zone und IsPalletTouched wird = false= Einmalige belohung +10 
+
+Episodenende:
+agent berührt wand  ( wall tag) -> Tod
+max steps erreicht = Tod
+50% der Max Steps erreicht und IsPalletTouched war NOCH NIE in dieser episode = true -> Tod
+
+Tod: -20 Strafe & Episode Ende.
+
+Alle palleten befinden sich in der dropzone und agent befindet sich für 2 sekunden nichtmehr in dropzone = +40 reward und Reachgole ( episode end)
