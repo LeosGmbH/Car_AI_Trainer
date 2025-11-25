@@ -1,4 +1,5 @@
 using Assets.Skripts;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -49,26 +50,43 @@ public class MLAgentController : Agent
 
     private int totalPalletsInScene;
     private bool isFirstEpisode = true;
+    [HideInInspector]
+    public bool wasRespawned = false;
     
     // Helper classes
     private MLAgentPerceptionHelper perceptionHelper;
     private MLAgentRewardHandler rewardHandler;
 
-
+    [Header("Debugging")]
+    [Tooltip("Enables verbose logging for this agent instance")]
+    [SerializeField] private bool enableDebugLogs = false;
+    [Tooltip("Angular velocity threshold that triggers debug logs")] 
+    [SerializeField] private float angularVelocityDebugThreshold = 10f;
+    [Tooltip("Linear velocity threshold that triggers debug logs")] 
+    [SerializeField] private float linearVelocityDebugThreshold = 15f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
 
+        // Force-enable debug logs for the last agent (index 4) to trace the reported issue.
+        if (agentIndex == 4)
+        {
+            enableDebugLogs = true;
+            LogDebug("Verbose logging auto-enabled for debugging last agent behaviour.");
+        }
+
         startPos = transform.localPosition;
         forkStartPos = forkTransform.localPosition;
         mastStartPos = mastTransform.localPosition;
+        LogDebug($"Awake: startPos={startPos}, forkStartPos={forkStartPos}, mastStartPos={mastStartPos}");
 
         dropZoneManager = FindAnyObjectByType<DropZoneManager>();
         if (dropZoneManager != null)
         {
             dropZoneTransform = dropZoneManager.transform;
+            LogDebug($"Found DropZoneManager '{dropZoneManager.name}'");
         }
         else
         {
@@ -80,6 +98,10 @@ public class MLAgentController : Agent
         {
             Debug.LogError("[MLAgentController] EnviromentController not found in scene!");
         }
+        else
+        {
+            LogDebug($"Found EnviromentController '{enviromentController.name}'");
+        }
 
         // Find agent-specific pallet parent.
         if (palletParent == null)
@@ -89,6 +111,10 @@ public class MLAgentController : Agent
             {
                 Debug.LogError($"[MLAgentController] Could not find 'Pallets ({agentIndex + 1})'!");
                 return;
+            }
+            else
+            {
+                LogDebug($"Found pallet parent '{palletParent.name}'");
             }
         }
 
@@ -104,25 +130,66 @@ public class MLAgentController : Agent
         {
             Debug.LogError($"[MLAgentController] Cannot initialize Agent {agentIndex + 1}!");
         }
-        
+
         // Try to find FitnessTracker if not assigned
         if (fitnessTracker == null)
         {
             fitnessTracker = GetComponent<FitnessTracker>();
+            if (fitnessTracker != null)
+            {
+                LogDebug("Attached FitnessTracker component located.");
+            }
+            else
+            {
+                Debug.LogWarning($"[MLAgentController] Agent {agentIndex + 1} missing FitnessTracker component.");
+            }
         }
 
         // Set Physics Layer for ghost agent isolation
-        int targetLayer = LayerMask.NameToLayer($"Agent_{agentIndex+1}"); // D2 = 2 digits with leading zero
+        int targetLayer = ResolveAgentLayer(agentIndex);
+
         if (targetLayer != -1)
         {
             SetLayerRecursively(gameObject, targetLayer);
+            LogDebug($"Assigned physics layer {targetLayer}.");
         }
         else
         {
-            Debug.LogWarning($"[MLAgentController] Layer 'Agent_{agentIndex+1:D2}' not found! Please create it in Project Settings > Tags and Layers.");
+            Debug.LogWarning($"[MLAgentController] Layer 'Agent_{agentIndex + 1}' or 'Agent_{agentIndex + 1:D2}' not found! Please create it in Project Settings > Tags and Layers.");
+        }
+    }
+
+    private void OnEnable()
+    {
+        LogDebug("OnEnable invoked.");
+    }
+
+    private void OnDisable()
+    {
+        LogDebug("OnDisable invoked.");
+    }
+
+    private void FixedUpdate()
+    {
+        if (!enableDebugLogs || rb == null) return;
+
+        float angularMag = rb.angularVelocity.magnitude;
+        float linearMag = rb.linearVelocity.magnitude;
+
+        if (angularMag > angularVelocityDebugThreshold)
+        {
+            LogDebug($"High angular velocity detected: {rb.angularVelocity} (mag={angularMag:F2}) at step {StepCount}");
         }
 
-        
+        if (linearMag > linearVelocityDebugThreshold)
+        {
+            LogDebug($"High linear velocity detected: {rb.linearVelocity} (mag={linearMag:F2}) at step {StepCount}");
+        }
+
+        if (transform.position.y < -1f)
+        {
+            LogWarning($"Agent below expected Y: position={transform.position}, velocity={rb.linearVelocity}, angular={rb.angularVelocity}");
+        }
     }
 
     private void SetLayerRecursively(GameObject obj, int layer)
@@ -134,14 +201,57 @@ public class MLAgentController : Agent
         }
     }
 
+    private int ResolveAgentLayer(int index)
+    {
+        string[] candidates =
+        {
+            $"Agent_{index + 1}",
+            $"Agent_{index + 1:D2}"
+        };
+
+        foreach (string layerName in candidates)
+        {
+            int layer = LayerMask.NameToLayer(layerName);
+            if (layer != -1)
+            {
+                LogDebug($"Resolved layer '{layerName}' -> {layer}");
+                return layer;
+            }
+            else
+            {
+                LogDebug($"Layer '{layerName}' not found.");
+            }
+        }
+
+        return -1;
+    }
+
+    private void LogDebug(string message)
+    {
+        if (enableDebugLogs)
+        {
+            Debug.Log($"[MLAgentController] Agent {agentIndex + 1}: {message}");
+        }
+    }
+
+    private void LogWarning(string message)
+    {
+        Debug.LogWarning($"[MLAgentController] Agent {agentIndex + 1}: {message}");
+    }
+
+    public bool IsDebugLoggingEnabled => enableDebugLogs;
+
     public override void OnEpisodeBegin()
     {
+        LogDebug($"OnEpisodeBegin invoked. wasRespawned={wasRespawned}, isFirstEpisode={isFirstEpisode}, fitnessDone={(fitnessTracker != null ? fitnessTracker.IsDone : (bool?)null)}");
+
         // 1. Check if this is a PPO-triggered reset that we didn't catch
         if (!isFirstEpisode && fitnessTracker != null && !fitnessTracker.IsDone)
         {
             var evoManager = Object.FindFirstObjectByType<EvolutionManager>();
             if (evoManager != null && evoManager.generationMode == EvolutionManager.GenerationMode.Survival)
             {
+                LogDebug("PPO reset detected while agent still active. Marking as done.");
                 fitnessTracker.MarkAsDone();
             }
         }
@@ -150,6 +260,7 @@ public class MLAgentController : Agent
         // 2. SURVIVAL MODE CHECK: If Done, stay frozen
         if (fitnessTracker != null && fitnessTracker.IsDone)
         {
+            LogDebug("FitnessTracker indicates done. Forcing kinematic state and aborting episode setup.");
             // Set kinematic FIRST, then velocity (order matters!)
             if (!rb.isKinematic) rb.isKinematic = true;
             return; 
@@ -161,10 +272,25 @@ public class MLAgentController : Agent
         rb.isKinematic = false; // Ensure physics is on FIRST
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        transform.localPosition = startPos;
+        LogDebug("Reset velocities and disabled kinematic mode.");
+
+        // If we were just respawned by the evolution manager, don't reset position.
+        if (wasRespawned)
+        {
+            LogDebug($"Respawn flag true. Maintaining current transform (pos={transform.position}, rot={transform.rotation.eulerAngles}).");
+            wasRespawned = false; // Consume the flag
+        }
+        else
+        {
+            transform.localPosition = startPos;
+            transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            LogDebug($"Reset transform to start position {startPos}.");
+        }
+
+        // Reset fork and mast regardless
         forkTransform.localPosition = forkStartPos;
         mastTransform.localPosition = mastStartPos;
-        transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        LogDebug("Fork and mast positions reset to defaults.");
         // transform.Rotate(0f, Random.Range(0f, 360f), 0f); // Optional für Variation.
 
         // NEU: DropZone leeren und Zähler zurücksetzen
@@ -173,58 +299,17 @@ public class MLAgentController : Agent
         rewardHandler.Reset();
         rewardHandler.hasEverTouchedPallet = false;
         perceptionHelper.FindClosestPallets();
+        LogDebug("Perception helper updated target pallets after reset.");
+
     }
-
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        // If done, send zeros or last state? Zeros is probably safer to avoid noise.
-        if (fitnessTracker != null && fitnessTracker.IsDone)
-        {
-            for(int i=0; i<10; i++) sensor.AddObservation(0f);
-            return;
-        }
-
-        perceptionHelper.FindClosestPallets();
-
-        // Vector Observation Size: 10 Floats
-
-        // 1. Eigene Geschwindigkeit (2) - Nur XZ-Ebene, normalisiert
-        sensor.AddObservation(Mathf.Clamp(rb.linearVelocity.x / 8f, -1f, 1f));
-        sensor.AddObservation(Mathf.Clamp(rb.linearVelocity.z / 8f, -1f, 1f));
-
-        // 2. Gabel Status (2)
-        float forkNorm = (forkTransform.localPosition.y - minY) / (maxY - minY);
-        sensor.AddObservation(forkNorm);     // Normalisierte Gabelhöhe [0, 1]
-        sensor.AddObservation(IsPalletTouched); // NEU: Signal zum Anheben!
-        sensor.AddObservation(IsPalletLifted);
-
-        // 3. Fortschritt (1)
-        sensor.AddObservation((float)dropZoneManager.GetCount() / totalPalletsInScene);
-
-        // 4. Steuerung (1)
-        sensor.AddObservation(rb.angularVelocity.y / 10f); // Normalisierte Drehgeschwindigkeit
-
-        // 5. Target Pallet (3)
-        Transform targetPallet = perceptionHelper.TargetPallet;
-        if (targetPallet != null)
-        {
-            Vector3 relative = targetPallet.position - transform.position;
-            sensor.AddObservation(Mathf.Clamp(relative.x / 10f, -1f, 1f));
-            sensor.AddObservation(Mathf.Clamp(relative.z / 10f, -1f, 1f));
-            sensor.AddObservation(1f); // Target exists
-        }
-        else
-        {
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f); // Target does not exist
-        }
-    }
-
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        if (fitnessTracker != null && fitnessTracker.IsDone) return;
+        if (fitnessTracker != null && fitnessTracker.IsDone)
+        {
+            LogDebug("Ignoring actions because agent is marked done.");
+            return;
+        }
 
         // 1. Aktionen extrahieren
         float moveInput = actions.ContinuousActions[0];
@@ -248,17 +333,31 @@ public class MLAgentController : Agent
         }
         rewardHandler.ApplyRewardLogic(forkInput, StepCount, MaxStep);
 
+        if (enableDebugLogs)
+        {
+            if (StepCount % 25 == 0 || Mathf.Abs(rb.angularVelocity.magnitude) > angularVelocityDebugThreshold)
+            {
+                LogDebug($"ActionReceived step={StepCount}, move={moveInput:F2}, steer={rotateInput:F2}, fork={forkInput}, handbrake={handbrakeInput}, vel={rb.linearVelocity}, angVel={rb.angularVelocity}");
+            }
+        }
+
         // 4. Episoden-Ende prüfen
         if (dropZoneManager.IsComplete(totalPalletsInScene))
         {
             rewardHandler.ReachGoal(StepCount, MaxStep);
             if (fitnessTracker != null) fitnessTracker.MarkAsDone();
+            LogDebug("Drop zone complete – agent marked as done.");
         }
 
+        // End of episode due to timeout
         if (StepCount >= MaxStep)
         {
-            rewardHandler.Die();
+            // DO NOT call EndEpisode() here. This creates a race condition with the EvolutionManager.
+            // Instead, just mark this agent as 'done' and let the manager handle the generation end in a controlled way.
             if (fitnessTracker != null) fitnessTracker.MarkAsDone();
+
+            // We can still apply a penalty for timing out.
+            AddAgentReward(-1f);
 
             Academy.Instance.StatsRecorder.Add("Result/WallCollision", 0, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add("Result/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
@@ -267,6 +366,7 @@ public class MLAgentController : Agent
             Academy.Instance.StatsRecorder.Add($"Result/{levelName}/TimeoutNoTouch", 0, StatAggregationMethod.Sum);
             Academy.Instance.StatsRecorder.Add($"Result/{levelName}/DieMaxStep", 1, StatAggregationMethod.Sum);
             Debug.Log("Died, Steps überschritten");
+            LogDebug("MaxStep reached; timeout penalty applied.");
         }
 
         rewardHandler.SaveLastActions(actions.ContinuousActions);
@@ -285,6 +385,7 @@ public class MLAgentController : Agent
             
             rewardHandler.Die();
             if (fitnessTracker != null) fitnessTracker.MarkAsDone();
+            LogWarning($"Collided with wall '{collision.gameObject.name}'. Marking as done.");
         }
     }
 
@@ -308,6 +409,38 @@ public class MLAgentController : Agent
         discreteActions[1] = handbrakeInput > 0.5f ? 1 : 0;
     }
 
+    public void ReinitializeForRespawn(int newAgentIndex)
+    {
+        Debug.Log($"[MLAgentController] Re-initializing agent {agentIndex+1} as a copy of {newAgentIndex+1}.");
+        LogDebug($"ReinitializeForRespawn called with parent index {newAgentIndex}");
+
+        // Find the pallet parent of the elite agent we are copying
+        palletParent = GameObject.Find($"Pallets ({newAgentIndex + 1})");
+        if (palletParent == null)
+        {
+            Debug.LogError($"[MLAgentController] Respawn failed: Could not find 'Pallets ({newAgentIndex + 1})'!");
+            return;
+        }
+        else
+        {
+            LogDebug($"Respawn pallet parent '{palletParent.name}' found.");
+        }
+
+        // Re-create the helpers with the new pallet references
+        if (dropZoneManager != null)
+        {
+            perceptionHelper = new MLAgentPerceptionHelper(transform, palletParent, dropZoneManager);
+            rewardHandler = new MLAgentRewardHandler(this, dropZoneManager, rb, forkTransform, perceptionHelper, minY, maxY);
+            totalPalletsInScene = perceptionHelper.GetTotalPalletCount();
+            Debug.Log($"[MLAgentController] Respawn successful. Now targeting {totalPalletsInScene} pallets.");
+            LogDebug("Respawn helpers reinitialized.");
+        }
+
+        // Reset internal state for the new episode
+        rewardHandler.Reset();
+        perceptionHelper.FindClosestPallets();
+        LogDebug("Respawn state reset completed.");
+    }
 
     public void AddAgentReward(float ammount)
     {

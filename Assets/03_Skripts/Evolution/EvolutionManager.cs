@@ -91,17 +91,36 @@ public class EvolutionManager : MonoBehaviour
         // Spawn all agents
         for (int i = 0; i < agentCount; i++)
         {
-            int layer = LayerMask.NameToLayer($"Agent_{i + 1}");
+            bool shouldLogAgent = ShouldLogAgent(i);
+            if (shouldLogAgent)
+            {
+                Debug.Log($"[EvolutionManager] Preparing spawn for Agent index={i} (name will be Agent_{i + 1})");
+            }
+
+            int layer = ResolveAgentLayer(i);
+            if (layer == -1)
+            {
+                Debug.LogWarning($"[EvolutionManager] Layer 'Agent_{i + 1}' or 'Agent_{i + 1:D2}' not found. Agent {i + 1} will use default collisions.");
+            }
+
             SpawnPalletsForAgent(i, palletPositions, layer);
             // 1. Spawn Agent (as child of AllAgents)
             Transform parentTransform = allAgentsParent != null ? allAgentsParent.transform : null;
             GameObject agent = Instantiate(agentPrefab, spawnPos, Quaternion.identity, parentTransform);
             agent.name = $"Agent_{i + 1}";
+            if (shouldLogAgent)
+            {
+                Debug.Log($"[EvolutionManager] Spawned GameObject '{agent.name}' at {spawnPos} with layer {layer}");
+            }
 
             // 2. Set Layer
             if (layer != -1)
             {
                 SetLayerRecursively(agent, layer);
+                if (shouldLogAgent)
+                {
+                    Debug.Log($"[EvolutionManager] Applied physics layer {layer} to '{agent.name}' hierarchy");
+                }
             }
 
             // 3. Configure Components
@@ -109,6 +128,10 @@ public class EvolutionManager : MonoBehaviour
             if (controller != null)
             {
                 controller.agentIndex = i;
+                if (shouldLogAgent)
+                {
+                    Debug.Log($"[EvolutionManager] Assigned agentIndex={i} to '{agent.name}', debugLogging={controller.IsDebugLoggingEnabled}");
+                }
             }
 
             // 4. Spawn Pallets (same positions for all agents)
@@ -125,6 +148,7 @@ public class EvolutionManager : MonoBehaviour
 
     private void SpawnPalletsForAgent(int agentIndex, Vector3[] positions, int layer)
     {
+        bool shouldLogAgent = ShouldLogAgent(agentIndex);
         // Create a container for this agent's pallets
         Transform parentTransform = allPalletsParent != null ? allPalletsParent.transform : null;
         GameObject palletContainer = new GameObject($"Pallets ({agentIndex + 1})");
@@ -132,13 +156,49 @@ public class EvolutionManager : MonoBehaviour
         palletContainer.transform.position = Vector3.zero;
         palletContainer.transform.rotation = Quaternion.identity;
 
+        if (layer != -1)
+        {
+            SetLayerRecursively(palletContainer, layer);
+            if (shouldLogAgent)
+            {
+                Debug.Log($"[EvolutionManager] Pallet container '{palletContainer.name}' assigned layer {layer}");
+            }
+        }
+
         // Spawn individual pallets at each position
         for (int p = 0; p < positions.Length; p++)
         {
             GameObject pallet = Instantiate(palletPrefab, positions[p], Quaternion.identity, palletContainer.transform);
             pallet.name = $"PalletEvo ({p})";
-            SetLayerRecursively(pallet, layer);
+            if (layer != -1)
+            {
+                SetLayerRecursively(pallet, layer);
+            }
+            if (shouldLogAgent)
+            {
+                Debug.Log($"[EvolutionManager] Spawned pallet '{pallet.name}' for Agent_{agentIndex + 1} at {positions[p]}");
+            }
         }
+    }
+
+    private int ResolveAgentLayer(int index)
+    {
+        string[] candidates =
+        {
+            $"Agent_{index + 1}",
+            $"Agent_{index + 1:D2}"
+        };
+
+        foreach (string layerName in candidates)
+        {
+            int layer = LayerMask.NameToLayer(layerName);
+            if (layer != -1)
+            {
+                return layer;
+            }
+        }
+
+        return -1;
     }
 
     private Vector3 GenerateRandomPalletPosition()
@@ -210,23 +270,24 @@ public class EvolutionManager : MonoBehaviour
     private void StartGeneration()
     {
         timer = 0f;
-        Debug.Log($"[EvolutionManager] Generation {generationCount} Started.");
-        
+        Debug.Log($"[EvolutionManager] Generation {generationCount} started (mode: {generationMode}, agents: {agents.Count})");
+
         activeAgents.Clear();
         foreach (var agent in agents)
         {
             agent.ResetFitness();
+            Debug.Log($"[EvolutionManager] Generation {generationCount}: activated agent '{agent.gameObject.name}'");
             activeAgents.Add(agent);
+            if (ShouldLogAgent(agent))
+            {
+                var ctrl = agent.gameObject.GetComponent<MLAgentController>();
+                Debug.Log($"[EvolutionManager] Agent '{agent.gameObject.name}' reset -> IsDone={agent.IsDone}, ctrlDebug={(ctrl != null ? ctrl.IsDebugLoggingEnabled : (bool?)null)}");
+            }
         }
     }
 
     private void EndGeneration()
     {
-        if (agents.Count == 0)
-        {
-            FindAgents();
-            if (agents.Count == 0) return;
-        }
 
         // 1. Sort by fitness
         var sortedAgents = agents.OrderByDescending(a => a.GetFitness()).ToList();
@@ -254,19 +315,30 @@ public class EvolutionManager : MonoBehaviour
         // 4. Handle Elites
         foreach (var elite in elites)
         {
+            Debug.Log($"[EvolutionManager] Elite survivor '{elite.gameObject.name}' (fitness {elite.GetFitness():F2})");
             elite.OnSurvive();
+            if (ShouldLogAgent(elite))
+            {
+                Debug.Log($"[EvolutionManager] -> Elite '{elite.gameObject.name}' belongs to tracked agent (index 5)");
+            }
         }
 
         // 5. Handle Others (Die / Respawn)
         foreach (var other in others)
         {
+            Debug.Log($"[EvolutionManager] Culling agent '{other.gameObject.name}' (fitness {other.GetFitness():F2})");
             other.Die();
-            
+
             if (respawnAtElite && elites.Count > 0)
             {
                 // Pick random elite to spawn near
                 var parent = elites[Random.Range(0, elites.Count)];
+                Debug.Log($"[EvolutionManager] Respawning '{other.gameObject.name}' from elite '{parent.gameObject.name}'");
                 RespawnAsChild(other, parent);
+                if (ShouldLogAgent(other))
+                {
+                    Debug.Log($"[EvolutionManager] -> '{other.gameObject.name}' (Agent 5) selected for respawn from '{parent.gameObject.name}'");
+                }
             }
             else
             {
@@ -276,6 +348,7 @@ public class EvolutionManager : MonoBehaviour
 
         // 6. Next Gen
         generationCount++;
+        Debug.Log($"[EvolutionManager] Preparing generation {generationCount}");
         StartGeneration();
     }
 
@@ -284,17 +357,51 @@ public class EvolutionManager : MonoBehaviour
         Transform parentTrans = parent.gameObject.transform;
         Transform childTrans = child.gameObject.transform;
 
-        // Reset Physics if any
-        Rigidbody rb = child.gameObject.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
+        // Teleport with an offset to prevent physics explosions from ground penetration.
+        Vector3 verticalOffset = Vector3.up * 0.5f; // Spawn 0.5m above the parent to avoid ground collision.
+        Vector3 randomHorizontalOffset = Random.insideUnitSphere * 0.2f; // Small horizontal jitter.
+        randomHorizontalOffset.y = 0;
 
-        // Teleport
-        childTrans.position = parentTrans.position;
+        Vector3 targetPos = parentTrans.position + verticalOffset + randomHorizontalOffset;
+        childTrans.position = targetPos;
         childTrans.rotation = parentTrans.rotation;
+        Debug.Log($"[EvolutionManager] Respawn '{child.gameObject.name}' near '{parent.gameObject.name}' at {targetPos}");
+
+        // HARD RESET PHYSICS STATE: This is the definitive fix.
+        // Deactivating and reactivating the GameObject forces Unity to discard the old,
+        // corrupted physics state and create a fresh one, preventing the explosion.
+        Debug.Log($"[EvolutionManager] Respawn '{child.gameObject.name}': toggling active state to reset physics");
+        child.gameObject.SetActive(false);
+        child.gameObject.SetActive(true);
+
+        // Re-initialize the agent's logic to find the new pallets
+        var childController = child.gameObject.GetComponent<MLAgentController>();
+        var parentController = parent.gameObject.GetComponent<MLAgentController>();
+        if (childController != null && parentController != null)
+        {
+            Debug.Log($"[EvolutionManager] Respawn '{child.gameObject.name}': reinit with parent index {parentController.agentIndex}");
+            childController.ReinitializeForRespawn(parentController.agentIndex);
+            childController.wasRespawned = true; // Set flag to prevent position reset
+            if (ShouldLogAgent(child))
+            {
+                Debug.Log($"[EvolutionManager] -> '{child.gameObject.name}' (Agent 5) marked as respawned; parent index {parentController.agentIndex}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[EvolutionManager] Respawn '{child.gameObject.name}': missing MLAgentController (child: {childController != null}, parent: {parentController != null})");
+        }
+    }
+
+    private bool ShouldLogAgent(int agentIndex)
+    {
+        return agentIndex == 4; // Agent 5 (0-based index)
+    }
+
+    private bool ShouldLogAgent(IEvolutionAgent agent)
+    {
+        if (agent == null || agent.gameObject == null) return false;
+        return agent.gameObject.name.EndsWith("5") || agent.gameObject.name.Contains("5");
     }
 
     private void OnGUI()
