@@ -18,6 +18,11 @@ public class EnviromentController : MonoBehaviour
 
     void Start()
     {
+        // Don't auto-find here, EvolutionManager will call FindPalletParents() after spawning
+    }
+
+    public void FindPalletParents()
+    {
         // Get agent count from EvolutionManager
         var evolutionManager = FindFirstObjectByType<EvolutionManager>();
         int agentCount = 4; // Default
