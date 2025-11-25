@@ -25,7 +25,7 @@ public class EvolutionManager : MonoBehaviour
     [Tooltip("Agent prefab to spawn")]
     public GameObject agentPrefab;
 
-    [Tooltip("Pallet prefab (should contain 'Pallets' with one 'PalletEvo (0)' child)")]
+    [Tooltip("Pallet prefab (single pallet GameObject that will be cloned)")]
     public GameObject palletPrefab;
 
     [Tooltip("Number of agents to spawn (1-20)")]
@@ -91,13 +91,14 @@ public class EvolutionManager : MonoBehaviour
         // Spawn all agents
         for (int i = 0; i < agentCount; i++)
         {
+            int layer = LayerMask.NameToLayer($"Agent_{i + 1}");
+            SpawnPalletsForAgent(i, palletPositions, layer);
             // 1. Spawn Agent (as child of AllAgents)
             Transform parentTransform = allAgentsParent != null ? allAgentsParent.transform : null;
             GameObject agent = Instantiate(agentPrefab, spawnPos, Quaternion.identity, parentTransform);
             agent.name = $"Agent_{i + 1}";
 
             // 2. Set Layer
-            int layer = LayerMask.NameToLayer($"Agent_{i + 1}");
             if (layer != -1)
             {
                 SetLayerRecursively(agent, layer);
@@ -111,7 +112,6 @@ public class EvolutionManager : MonoBehaviour
             }
 
             // 4. Spawn Pallets (same positions for all agents)
-            SpawnPalletsForAgent(i, palletPositions, layer);
         }
 
         Debug.Log($"[EvolutionManager] Spawned {agentCount} ghost agents with {palletsPerAgent} pallets each");
@@ -125,29 +125,19 @@ public class EvolutionManager : MonoBehaviour
 
     private void SpawnPalletsForAgent(int agentIndex, Vector3[] positions, int layer)
     {
-        // Spawn the pallet prefab (contains "Pallets" with one "PalletEvo (0)")
+        // Create a container for this agent's pallets
         Transform parentTransform = allPalletsParent != null ? allPalletsParent.transform : null;
-        GameObject palletContainer = Instantiate(palletPrefab, Vector3.zero, Quaternion.identity, parentTransform);
-        palletContainer.name = $"Pallets ({agentIndex + 1})";
+        GameObject palletContainer = new GameObject($"Pallets ({agentIndex + 1})");
+        palletContainer.transform.SetParent(parentTransform);
+        palletContainer.transform.position = Vector3.zero;
+        palletContainer.transform.rotation = Quaternion.identity;
 
-        // Find the first PalletEvo child to use as template
-        Transform firstPallet = palletContainer.transform.Find("PalletEvo (0)");
-        if (firstPallet == null)
+        // Spawn individual pallets at each position
+        for (int p = 0; p < positions.Length; p++)
         {
-            Debug.LogError($"[EvolutionManager] Pallet prefab must have a child named 'PalletEvo (0)'!");
-            return;
-        }
-
-        // Position the first pallet
-        firstPallet.position = positions[0];
-        SetLayerRecursively(firstPallet.gameObject, layer);
-
-        // Clone the first pallet for remaining positions
-        for (int p = 1; p < positions.Length; p++)
-        {
-            GameObject clonedPallet = Instantiate(firstPallet.gameObject, positions[p], Quaternion.identity, palletContainer.transform);
-            clonedPallet.name = $"PalletEvo ({p})";
-            SetLayerRecursively(clonedPallet, layer);
+            GameObject pallet = Instantiate(palletPrefab, positions[p], Quaternion.identity, palletContainer.transform);
+            pallet.name = $"PalletEvo ({p})";
+            SetLayerRecursively(pallet, layer);
         }
     }
 

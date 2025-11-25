@@ -61,7 +61,8 @@ public class NewCarController : MonoBehaviour
     public float Revs { get; private set; }
     public float AccelInput { get; private set; }
 
-    private void Start()
+
+    private void Awake()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
 

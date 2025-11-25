@@ -50,7 +50,10 @@ namespace Assets.Skripts
             float accel = Mathf.Max(0f, MoveInput);
             float footbrake = Mathf.Min(0f, MoveInput);
 
-            carController.Move(SteerInput, accel, footbrake, HandbrakeInput);
+            if (carController != null)
+            {
+                carController.Move(SteerInput, accel, footbrake, HandbrakeInput);
+            }
         }
 
         public Dictionary<string, string> GetDebugInformations()

@@ -53,19 +53,57 @@ public class MLAgentController : Agent
     // Helper classes
     private MLAgentPerceptionHelper perceptionHelper;
     private MLAgentRewardHandler rewardHandler;
-    
 
-    void Start()
-    {
-        startPos = transform.localPosition;
-        forkStartPos = forkTransform.localPosition;
-        mastStartPos = mastTransform.localPosition;
-    }
+
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         playerMovement = GetComponent<MovementController>();
+
+        startPos = transform.localPosition;
+        forkStartPos = forkTransform.localPosition;
+        mastStartPos = mastTransform.localPosition;
+
+        dropZoneManager = FindAnyObjectByType<DropZoneManager>();
+        if (dropZoneManager != null)
+        {
+            dropZoneTransform = dropZoneManager.transform;
+        }
+        else
+        {
+            Debug.LogError("[MLAgentController] DropZoneManager not found in scene!");
+        }
+
+        enviromentController = FindAnyObjectByType<EnviromentController>();
+        if (enviromentController == null)
+        {
+            Debug.LogError("[MLAgentController] EnviromentController not found in scene!");
+        }
+
+        // Find agent-specific pallet parent.
+        if (palletParent == null)
+        {
+            palletParent = GameObject.Find($"Pallets ({agentIndex + 1})");
+            if (palletParent == null)
+            {
+                Debug.LogError($"[MLAgentController] Could not find 'Pallets ({agentIndex + 1})'!");
+                return;
+            }
+        }
+
+        // Initialize helpers AFTER all dependencies are found
+        if (dropZoneManager != null && palletParent != null)
+        {
+            perceptionHelper = new MLAgentPerceptionHelper(transform, palletParent, dropZoneManager);
+            rewardHandler = new MLAgentRewardHandler(this, dropZoneManager, rb, forkTransform, perceptionHelper, minY, maxY);
+            totalPalletsInScene = perceptionHelper.GetTotalPalletCount();
+            Debug.Log($"[MLAgentController] Agent {agentIndex + 1} initialized with {totalPalletsInScene} pallets");
+        }
+        else
+        {
+            Debug.LogError($"[MLAgentController] Cannot initialize Agent {agentIndex + 1}!");
+        }
         
         // Try to find FitnessTracker if not assigned
         if (fitnessTracker == null)
@@ -84,22 +122,7 @@ public class MLAgentController : Agent
             Debug.LogWarning($"[MLAgentController] Layer 'Agent_{agentIndex+1:D2}' not found! Please create it in Project Settings > Tags and Layers.");
         }
 
-        // Find agent-specific pallet parent if not assigned
-        if (palletParent == null)
-        {
-            palletParent = GameObject.Find($"Pallets ({agentIndex+1})");
-            if (palletParent == null)
-            {
-                Debug.LogError($"[MLAgentController] Could not find 'Pallets ({agentIndex + 1})'! Make sure it exists in the scene.");
-            }
-        }
-
-        // Initialize helpers
-        perceptionHelper = new MLAgentPerceptionHelper(transform, palletParent, dropZoneManager);
-        rewardHandler = new MLAgentRewardHandler(this, dropZoneManager, rb, forkTransform, perceptionHelper, minY, maxY);
-
-        // Zähle alle Paletten zu Beginn
-        totalPalletsInScene = perceptionHelper.GetTotalPalletCount();
+        
     }
 
     private void SetLayerRecursively(GameObject obj, int layer)

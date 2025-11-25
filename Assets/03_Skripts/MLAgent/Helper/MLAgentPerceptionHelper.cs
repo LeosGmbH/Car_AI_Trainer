@@ -20,6 +20,13 @@ public class MLAgentPerceptionHelper
     public void FindClosestPallets()
     {
         TargetPallet = null;
+        
+        if (palletParent == null)
+        {
+            Debug.LogWarning("[MLAgentPerceptionHelper] palletParent is null!");
+            return;
+        }
+
         float closestDistSqr = float.MaxValue;
 
         int childCount = palletParent.transform.childCount;
@@ -28,7 +35,7 @@ public class MLAgentPerceptionHelper
             Transform child = palletParent.transform.GetChild(i);
             
             // Ignore pallets already in the drop zone
-            if (dropZoneManager.palletsInZone.Contains(child.gameObject))
+            if (dropZoneManager != null && dropZoneManager.palletsInZone.Contains(child.gameObject))
                 continue;
 
             float distSqr = (child.position - agentTransform.position).sqrMagnitude;
@@ -42,6 +49,11 @@ public class MLAgentPerceptionHelper
 
     public int GetTotalPalletCount()
     {
+        if (palletParent == null)
+        {
+            Debug.LogWarning("[MLAgentPerceptionHelper] palletParent is null in GetTotalPalletCount!");
+            return 0;
+        }
         return palletParent.transform.childCount;
     }
 }
